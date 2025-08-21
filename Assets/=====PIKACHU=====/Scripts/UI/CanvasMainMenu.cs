@@ -20,6 +20,7 @@ public class CanvasMainMenu : UICanvas
 
     public void SettingButton()
     {
-        UIManager.Instance.OpenUI<CanvasSettings>();
+        var settings = UIManager.Instance.OpenUI<CanvasSettings>();
+        settings.SetState(this);
     }
 }

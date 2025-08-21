@@ -6,6 +6,10 @@ public class BoardInput : MonoBehaviour
 {
     void Update()
     {
+        // Chỉ cho phép input khi game đang playing
+        if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Playing)
+            return;
+
         if (Input.GetMouseButtonDown(0))
         {
             Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);

@@ -62,7 +62,7 @@ public class BoardManager : Singleton<BoardManager>
     /// <summary>
     /// Xóa board cũ
     /// </summary>
-    private void ClearBoard()
+    public void ClearBoard()
     {
         // Xóa tất cả tiles
         if (tiles != null)

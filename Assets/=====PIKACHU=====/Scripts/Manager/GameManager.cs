@@ -247,6 +247,17 @@ public class GameManager : Singleton<GameManager>
         CurrentState = GameState.MainMenu;
         OnGameStateChanged?.Invoke(CurrentState);
         
+        // Reset game state
+        IsPlaying = false;
+        IsPaused = false;
+        Time.timeScale = 1f;
+        
+        // Clear board if exists
+        if (BoardManager.Instance != null)
+        {
+            BoardManager.Instance.ClearBoard();
+        }
+        
         UIManager.Instance.CloseAll();
         UIManager.Instance.OpenUI<CanvasMainMenu>();
         

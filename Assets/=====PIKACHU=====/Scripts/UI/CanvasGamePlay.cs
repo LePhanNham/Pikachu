@@ -12,6 +12,7 @@ public class CanvasGamePlay : UICanvas
     [SerializeField] private Button pauseButton;
     [SerializeField] private Button hintButton;
     [SerializeField] private Button shuffleButton;
+    [SerializeField] private Button settingsButton;
 
     public override void Setup()
     {
@@ -32,6 +33,11 @@ public class CanvasGamePlay : UICanvas
             shuffleButton.onClick.RemoveAllListeners();
             shuffleButton.onClick.AddListener(OnShuffleClicked);
         }
+        if (settingsButton != null)
+        {
+            settingsButton.onClick.RemoveAllListeners();
+            settingsButton.onClick.AddListener(OnSettingsClicked);
+        }
     }
 
     private void Update()
@@ -48,15 +54,19 @@ public class CanvasGamePlay : UICanvas
         if (GameManager.Instance.CurrentState == GameState.Playing)
         {
             GameManager.Instance.PauseGame();
-            // Open settings as pause menu
-            var settings = UIManager.Instance.OpenUI<CanvasSettings>();
-            settings.SetState(this);
+            UIManager.Instance.OpenUI<CanvasPause>();
         }
         else if (GameManager.Instance.CurrentState == GameState.Paused)
         {
-            UIManager.Instance.CloseUIDirectly<CanvasSettings>();
+            UIManager.Instance.CloseUIDirectly<CanvasPause>();
             GameManager.Instance.ResumeGame();
         }
+    }
+
+    private void OnSettingsClicked()
+    {
+        var settings = UIManager.Instance.OpenUI<CanvasSettings>();
+        settings.SetState(this);
     }
 
     private void OnHintClicked()

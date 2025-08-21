@@ -14,9 +14,7 @@ public class PathFinder : Singleton<PathFinder>
         return BFS(board, rows, cols, start, end);
     }
 
-    /// <summary>
-    /// Lấy đường đi giữa 2 node
-    /// </summary>
+ 
     public List<Vector3> GetPath(NodeData[,] board, int rows, int cols, NodeData start, NodeData end)
     {
         if (start.node != end.node || (start.posX == end.posX && start.posY == end.posY)) return new List<Vector3>();
@@ -29,9 +27,7 @@ public class PathFinder : Singleton<PathFinder>
         return new List<Vector3>();
     }
 
-    /// <summary>
-    /// Lấy số lần rẽ của đường đi
-    /// </summary>
+
     public int GetPathTurns(NodeData[,] board, int rows, int cols, NodeData start, NodeData end)
     {
         if (start.node != end.node || (start.posX == end.posX && start.posY == end.posY)) return -1;
@@ -99,56 +95,6 @@ public class PathFinder : Singleton<PathFinder>
 
 
 
-    
-
-
-
-    // public bool BFS(NodeData[,] board, int rows, int cols, NodeData start, NodeData end)
-    // {
-    //     Queue<PathNode> q = new Queue<PathNode>();
-    //     bool[,,] visited = new bool[rows, cols, 4];
-    //     for (int d = 0; d < 4; d++)
-    //     {
-    //         int nX = start.posX + dx[d];
-    //         int nY = start.posY + dy[d];
-    //         if (CheckInSide(nX, nY, rows, cols) && (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY)))
-    //         {
-    //             q.Enqueue(new PathNode(nX, nY, d, 0));
-    //             visited[nX, nY, d] = true;
-    //         }
-    //     }
-
-    //     while (q.Count > 0)
-    //     {
-    //         PathNode cur = q.Dequeue();
-    //         Debug.Log(cur);
-    //         if (cur.x == end.posX && cur.y == end.posY && cur.turns <= 2)
-    //         {
-    //             return true;
-    //         }
-
-    //         for (int d = 0; d < 4; d++)
-    //         {
-    //             int nX = cur.x + dx[d];
-    //             int nY = cur.y + dy[d];
-    //             int turns = cur.turns + (d == cur.dir ? 0 : 1);
-
-    //             if (turns > 2) continue;
-
-    //             if (CheckInSide(nX, nY, rows, cols) && !visited[nX, nY, d])
-    //             {
-    //                 if (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY))
-    //                 {
-    //                     visited[nX, nY, d] = true;
-    //                     q.Enqueue(new PathNode(nX, nY, d, turns));
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return false;
-    // }
-
-
     public bool CheckInSide(int x, int y, int rows, int cols)
     {
         return x >= 0 && y >= 0 && x < rows && y < cols;
@@ -213,9 +159,7 @@ public class PathFinder : Singleton<PathFinder>
         return false;
     }
 
-    /// <summary>
-    /// BFS chỉ để đếm số lần rẽ
-    /// </summary>
+
     public int BFSWithTurns(NodeData[,] board, int maxX, int maxY, NodeData start, NodeData end)
     {
         Queue<PathNode> q = new Queue<PathNode>();
@@ -265,9 +209,7 @@ public class PathFinder : Singleton<PathFinder>
         return -1;
     }
 
-    /// <summary>
-    /// Tái tạo đường đi từ parent dictionary
-    /// </summary>
+
     private void ReconstructPath(Dictionary<(int,int,int), (int,int,int)> parent, NodeData start, NodeData end, PathNode finalNode)
     {
         lastPath.Clear();
