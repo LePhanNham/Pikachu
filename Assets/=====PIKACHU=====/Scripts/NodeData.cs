@@ -7,6 +7,7 @@ using UnityEngine;
 [Serializable]
 public class NodeData
 {
+    public float X, Y;
     public int posX;
     public int posY;
     public NodeType node;

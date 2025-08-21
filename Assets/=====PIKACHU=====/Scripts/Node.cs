@@ -12,8 +12,5 @@ public class Node : MonoBehaviour
         node = data;
     }
 
-    private void OnMouseDown()
-    {
-        BoardManager.Instance.SelectTile(node.posX, node.posY);
-    }
+
 }
