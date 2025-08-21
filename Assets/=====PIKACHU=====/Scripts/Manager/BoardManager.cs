@@ -203,13 +203,14 @@ public class BoardManager : Singleton<BoardManager>
         {
             firstSelect = node;
             firstSelect.state = NodeState.Selected;
-            firstSelect.tileObject.GetComponent<SpriteRenderer>().color = Color.yellow;
+            SafeSetColor(firstSelect, Color.yellow);
+            if (SoundManager.Instance != null) SoundManager.Instance.Click();
         }
         else
         {
             // Nếu chọn node thứ 2
             node.state = NodeState.Selected;
-            node.tileObject.GetComponent<SpriteRenderer>().color = Color.yellow;
+            SafeSetColor(node, Color.yellow);
 
             if (PathFinder.Instance.CanConnect(board, rows, cols, firstSelect, node))
             {
@@ -223,6 +224,7 @@ public class BoardManager : Singleton<BoardManager>
 
                 // Vẽ đường 1s rồi xóa
                 StartCoroutine(ShowPathAndRemove(firstSelect, node));
+                if (SoundManager.Instance != null) SoundManager.Instance.Match();
 
                 // Cập nhật thời gian match cuối
                 lastMatchTime = Time.time;
@@ -232,15 +234,23 @@ public class BoardManager : Singleton<BoardManager>
             else
             {
                 // reset màu nếu không nối được
-                firstSelect.tileObject.GetComponent<SpriteRenderer>().color = Color.white;
-                node.tileObject.GetComponent<SpriteRenderer>().color = Color.white;
+                SafeSetColor(firstSelect, Color.white);
+                SafeSetColor(node, Color.white);
 
                 firstSelect.state = NodeState.Normal;
                 node.state = NodeState.Normal;
 
                 firstSelect = null;
+                if (SoundManager.Instance != null) SoundManager.Instance.NoMove();
             }
         }
+    }
+
+    private void SafeSetColor(NodeData data, Color color)
+    {
+        if (data == null || data.tileObject == null) return;
+        var sr = data.tileObject.GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = color;
     }
 
 

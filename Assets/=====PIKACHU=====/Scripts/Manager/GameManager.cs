@@ -43,6 +43,8 @@ public class GameManager : Singleton<GameManager>
         CurrentLevel = 1;
         CurrentScore = 0;
         OnGameStateChanged?.Invoke(CurrentState);
+        // Play menu music
+        SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmMenu);
     }
 
     public void StartGame()
@@ -57,6 +59,7 @@ public class GameManager : Singleton<GameManager>
         OnGameStateChanged?.Invoke(CurrentState);
         
         Debug.Log("🎮 Bắt đầu game!");
+        SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmGameplay);
     }
 
     public void StartLevel(int level)
@@ -248,6 +251,7 @@ public class GameManager : Singleton<GameManager>
         UIManager.Instance.OpenUI<CanvasMainMenu>();
         
         Debug.Log("🏠 Về Main Menu");
+        SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmMenu);
     }
 
     // ================= UTILITY =================

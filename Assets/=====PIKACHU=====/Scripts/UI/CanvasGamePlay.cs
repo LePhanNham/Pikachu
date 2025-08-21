@@ -65,12 +65,14 @@ public class CanvasGamePlay : UICanvas
         {
             GameManager.Instance.UseHint();
             BoardManager.Instance.AutoSelectBestPair();
+            SoundManager.Instance.Click();
         }
     }
 
     private void OnShuffleClicked()
     {
         BoardManager.Instance.ShuffleBoard();
+        SoundManager.Instance.Click();
     }
 
     public void PauseButton() {
