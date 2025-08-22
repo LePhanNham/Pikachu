@@ -224,8 +224,21 @@ public class GameManager : Singleton<GameManager>
     // ================= LEVEL CONTROL =================
     public void RestartLevel()
     {
-        UIManager.Instance.CloseAll();
+        // Reset game state first
+        IsPlaying = true;
+        IsPaused = false;
+        Time.timeScale = 1f;
+        
+        // Clear board and restart level
+        if (BoardManager.Instance != null)
+        {
+            BoardManager.Instance.ClearBoard();
+        }
+        
         StartLevel(CurrentLevel);
+        
+        // Close all UI and open gameplay
+        UIManager.Instance.CloseAll();
         UIManager.Instance.OpenUI<CanvasGamePlay>();
     }
 

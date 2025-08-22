@@ -195,12 +195,20 @@ public class BoardManager : Singleton<BoardManager>
 
     public void SelectTile(int row, int col)
     {
+        Debug.Log($"SelectTile called at ({row}, {col}) at time {Time.time:F3}");
+        Debug.Log($"Current firstSelect: {firstSelect}");
+        
         NodeData node = board[row, col];
-        if (node == null || node.state != NodeState.Normal) return;
+        if (node == null || node.state != NodeState.Normal) 
+        {
+            Debug.Log($"Cannot select: node={node}, state={(node?.state.ToString() ?? "null")}");
+            return;
+        }
 
         // Nếu chưa chọn gì
         if (firstSelect == null)
         {
+            Debug.Log($"First selection: ({node.posX}, {node.posY}) - Setting firstSelect to {node}");
             firstSelect = node;
             firstSelect.state = NodeState.Selected;
             SafeSetColor(firstSelect, Color.yellow);
@@ -209,6 +217,7 @@ public class BoardManager : Singleton<BoardManager>
         else
         {
             // Nếu chọn node thứ 2
+            Debug.Log($"Second selection: ({node.posX}, {node.posY}) - First was: ({firstSelect.posX}, {firstSelect.posY})");
             node.state = NodeState.Selected;
             SafeSetColor(node, Color.yellow);
 
@@ -223,6 +232,7 @@ public class BoardManager : Singleton<BoardManager>
                 GameManager.Instance.AddScore(baseScore, isQuickMatch, false);
 
                 // Vẽ đường 1s rồi xóa
+                Debug.Log($"Starting ShowPathAndRemove coroutine for ({firstSelect.posX}, {firstSelect.posY}) <-> ({node.posX}, {node.posY}) at time {Time.time:F3}");
                 StartCoroutine(ShowPathAndRemove(firstSelect, node));
                 if (SoundManager.Instance != null) SoundManager.Instance.Match();
 
@@ -241,6 +251,7 @@ public class BoardManager : Singleton<BoardManager>
                 node.state = NodeState.Normal;
 
                 firstSelect = null;
+                Debug.Log("Reset firstSelect to null after failed match");
                 if (SoundManager.Instance != null) SoundManager.Instance.NoMove();
             }
         }
@@ -382,6 +393,8 @@ public class BoardManager : Singleton<BoardManager>
 
     private IEnumerator ShowPathAndRemove(NodeData nodeA, NodeData nodeB)
     {
+        Debug.Log($"ShowPathAndRemove coroutine STARTED for ({nodeA.posX}, {nodeA.posY}) <-> ({nodeB.posX}, {nodeB.posY}) at time {Time.time:F3}");
+        
         // Lấy đường đi từ PathFinder và vẽ tạm 1s bằng LineRenderer
         if (PathFinder.Instance != null)
         {
@@ -417,6 +430,7 @@ public class BoardManager : Singleton<BoardManager>
         board[nodeB.posX, nodeB.posY].state = NodeState.Empty;
 
         firstSelect = null;
+        Debug.Log($"ShowPathAndRemove coroutine FINISHED - Reset firstSelect to null after successful match at time {Time.time:F3}");
         nodeA.state = NodeState.Empty;
         nodeB.state = NodeState.Empty;
 
@@ -428,9 +442,15 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         // Kiểm tra nước đi
+        Debug.Log("Checking if board has any connectable pairs...");
         if (!HasAnyConnectablePair())
         {
+            Debug.Log("No connectable pairs found - Starting auto-shuffle");
             yield return StartCoroutine(ShuffleBoardWithEffect());
+        }
+        else
+        {
+            Debug.Log("Board still has connectable pairs - continuing game");
         }
     }
     
@@ -459,17 +479,22 @@ public class BoardManager : Singleton<BoardManager>
     /// </summary>
     private IEnumerator ShuffleBoardWithEffect()
     {
+        Debug.Log("ShuffleBoardWithEffect STARTED - Fading out tiles");
+        
         // Hiệu ứng fade out
         yield return StartCoroutine(FadeOutAllTiles());
         
+        Debug.Log("ShuffleBoardWithEffect - Shuffling board");
         // Shuffle
         ShuffleBoard();
         
+        Debug.Log("ShuffleBoardWithEffect - Fading in tiles");
         // Hiệu ứng fade in
         yield return StartCoroutine(FadeInAllTiles());
         
         // Reset combo
         ResetCombo();
+        Debug.Log("ShuffleBoardWithEffect FINISHED - Board shuffled and ready");
     }
     
     /// <summary>
@@ -606,6 +631,62 @@ public class BoardManager : Singleton<BoardManager>
     }
 
     // ================= BOARD STATE CHECK =================
+    
+    [ContextMenu("Debug Board State")]
+    public void DebugBoardState()
+    {
+        Debug.Log("=== BOARD STATE DEBUG ===");
+        Debug.Log($"Board: {board?.GetLength(0)}x{board?.GetLength(1)}");
+        Debug.Log($"Tiles: {tiles?.GetLength(0)}x{tiles?.GetLength(1)}");
+        Debug.Log($"FirstSelect: {firstSelect}");
+        
+        if (board != null)
+        {
+            int normalCount = 0, emptyCount = 0, selectedCount = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < cols; col++)
+                {
+                    if (board[row, col] != null)
+                    {
+                        switch (board[row, col].state)
+                        {
+                            case NodeState.Normal: normalCount++; break;
+                            case NodeState.Empty: emptyCount++; break;
+                            case NodeState.Selected: selectedCount++; break;
+                        }
+                    }
+                }
+            }
+            Debug.Log($"Normal: {normalCount}, Empty: {emptyCount}, Selected: {selectedCount}");
+        }
+        Debug.Log("========================");
+    }
+    
+    [ContextMenu("Force Reset FirstSelect")]
+    public void ForceResetFirstSelect()
+    {
+        Debug.Log($"Force reset firstSelect from {firstSelect} to null");
+        firstSelect = null;
+        
+        // Reset tất cả tiles về Normal state
+        if (board != null)
+        {
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < cols; col++)
+                {
+                    if (board[row, col] != null && board[row, col].state == NodeState.Selected)
+                    {
+                        board[row, col].state = NodeState.Normal;
+                        SafeSetColor(board[row, col], Color.white);
+                    }
+                }
+            }
+        }
+        Debug.Log("FirstSelect and all selected tiles have been reset");
+    }
+    
     private bool IsBoardCleared()
     {
         for (int row = 0; row < rows; row++)

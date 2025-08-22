@@ -258,7 +258,3 @@ public class PathNode
     }
 }
 
-/// <summary>
-/// BFS với đường đi
-/// </summary>
-// (đã di chuyển các hàm BFSWithPath, BFSWithTurns, ReconstructPath vào trong lớp PathFinder)

@@ -209,7 +209,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4, y: -4, z: -10}
+  m_LocalPosition: {x: 6, y: -4, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -272,6 +272,7 @@ GameObject:
   - component: {fileID: 1508022395}
   - component: {fileID: 1508022396}
   - component: {fileID: 1508022397}
+  - component: {fileID: 1508022398}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -350,6 +351,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f77c18e00e0f3947bfee83cba8da2af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1508022398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1508022391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2bf480bd63af914489c422ef0b76e2ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  musicSource: {fileID: 0}
+  sfxSource: {fileID: 0}
+  click: {fileID: 8300000, guid: 26967497473e677488a7b821f534dc76, type: 3}
+  match: {fileID: 8300000, guid: fabb4eb2c90aca042945c78df958172b, type: 3}
+  noMove: {fileID: 8300000, guid: 69d837daaabd4a645a0497f4a1c57415, type: 3}
+  win: {fileID: 8300000, guid: a98340884d0cf284591784ecc13a07fb, type: 3}
+  lose: {fileID: 8300000, guid: 0c361b661f799544e805d38eaa9600ce, type: 3}
+  bgmMenu: {fileID: 8300000, guid: 6374f28c278857544a7a7e0691a2daa8, type: 3}
+  bgmGameplay: {fileID: 8300000, guid: 31846cf8630ae394c879e96e726607e9, type: 3}
+  musicVolume: 0.7
+  sfxVolume: 0.739
+  muteMusic: 0
+  muteSfx: 0
 --- !u!1 &1605721822
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,7 +419,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1605721822}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 71a26c97f6b078e43afea15ec543fbdf, type: 3}
+  m_Script: {fileID: 11500000, guid: 25db220c3c433174abbb74f239bcf71a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   iconSprite:
@@ -533,37 +559,6 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
---- !u!1 &1691836402
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1691836403}
-  m_Layer: 0
-  m_Name: Pools
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1691836403
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1691836402}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1814358812}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1814358810
 GameObject:
   m_ObjectHideFlags: 0
@@ -607,7 +602,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1605721823}
-  - {fileID: 1691836403}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1966763207

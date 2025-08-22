@@ -21,8 +21,21 @@ public class BoardInput : MonoBehaviour
                 Node node = hit.collider.GetComponent<Node>();
                 if (node != null && node.node != null && node.node.state == NodeState.Normal && node.node.tileObject != null && node.node.tileObject.activeSelf)
                 {
+                    Debug.Log($"Click tile at ({node.node.posX}, {node.node.posY}) - State: {node.node.state}");
                     BoardManager.Instance.SelectTile(node.node.posX, node.node.posY);
                 }
+                else
+                {
+                    if (node == null) Debug.Log("Node component is null");
+                    else if (node.node == null) Debug.Log("NodeData is null");
+                    else if (node.node.state != NodeState.Normal) Debug.Log($"Tile state is {node.node.state}, not Normal");
+                    else if (node.node.tileObject == null) Debug.Log("TileObject is null");
+                    else if (!node.node.tileObject.activeSelf) Debug.Log("TileObject is not active");
+                }
+            }
+            else
+            {
+                Debug.Log("No collider hit");
             }
         }
     }
