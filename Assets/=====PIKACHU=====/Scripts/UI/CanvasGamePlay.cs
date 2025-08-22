@@ -65,8 +65,17 @@ public class CanvasGamePlay : UICanvas
 
     private void OnSettingsClicked()
     {
+        Debug.Log("OnSettingsClicked called - Opening CanvasSettings");
         var settings = UIManager.Instance.OpenUI<CanvasSettings>();
-        settings.SetState(this);
+        if (settings != null)
+        {
+            Debug.Log("CanvasSettings opened successfully");
+            settings.SetState(this);
+        }
+        else
+        {
+            Debug.LogError("Failed to open CanvasSettings!");
+        }
     }
 
     private void OnHintClicked()

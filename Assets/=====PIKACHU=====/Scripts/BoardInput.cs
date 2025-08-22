@@ -6,9 +6,16 @@ public class BoardInput : MonoBehaviour
 {
     void Update()
     {
-        // Chỉ cho phép input khi game đang playing
+        // Chỉ cho phép input khi game đang playing VÀ không có UI nào đang mở
         if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Playing)
             return;
+            
+        // Kiểm tra xem có UI nào đang mở không (Settings, Pause, etc.)
+        if (UIManager.Instance != null && UIManager.Instance.HasAnyUIOpen())
+        {
+            Debug.Log("Input blocked - UI is open");
+            return;
+        }
 
         if (Input.GetMouseButtonDown(0))
         {

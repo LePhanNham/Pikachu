@@ -54,9 +54,17 @@ public class CanvasSettings : UICanvas
     // Called by whoever opens settings to inform context
     public void SetState(UICanvas canvas)
     {
+        Debug.Log($"CanvasSettings.SetState called with canvas: {canvas?.GetType().Name}");
         openedOverMainMenu = canvas is CanvasMainMenu;
         // Track if opened from pause menu
         openedFromPause = canvas is CanvasPause;
+        Debug.Log($"Flags set - openedOverMainMenu: {openedOverMainMenu}, openedFromPause: {openedFromPause}");
+        
+        // Debug board state
+        if (BoardManager.Instance != null)
+        {
+            BoardManager.Instance.DebugBoardState();
+        }
     }
 
     private void SyncUIFromSound()

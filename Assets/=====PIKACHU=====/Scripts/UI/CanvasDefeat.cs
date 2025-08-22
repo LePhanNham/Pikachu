@@ -16,7 +16,8 @@ public class CanvasDefeat : UICanvas
     {
         // Load lại màn chơi
         UIManager.Instance.CloseAll();
-        GameManager.Instance.RestartLevel();
+        GameManager.Instance.StartGame();
+        UIManager.Instance.OpenUI<CanvasGamePlay>();
     }
 
     public void HomeButton()

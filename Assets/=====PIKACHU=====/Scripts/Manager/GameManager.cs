@@ -12,8 +12,8 @@ public class GameManager : Singleton<GameManager>
     public bool IsPaused { get; private set; }
 
     [Header("Level Settings")]
-    [SerializeField] private float baseTime = 300f; // 5 phút cơ bản
-    [SerializeField] private float timeReductionPerLevel = 10f; // Giảm 10s mỗi level
+    [SerializeField] private float baseTime = 20f; // 20 giây để test
+    [SerializeField] private float timeReductionPerLevel = 5f; // Giảm 5s mỗi level
     [SerializeField] private int scoreTargetPerLevel = 1000; // Điểm cần đạt để qua level
     [SerializeField] private int maxLevel = 10;
 
@@ -64,13 +64,36 @@ public class GameManager : Singleton<GameManager>
 
     public void StartLevel(int level)
     {
+        Debug.Log("=== START LEVEL START ===");
+        Debug.Log($"StartLevel called for level {level}");
+        Debug.Log($"Before StartLevel - totalTime: {totalTime:F1}s, TimeLeft: {TimeLeft:F1}s");
+        Debug.Log($"baseTime: {baseTime}, timeReductionPerLevel: {timeReductionPerLevel}");
+        
+        // Validate values
+        if (baseTime <= 0)
+        {
+            Debug.LogError($"baseTime is invalid: {baseTime}, setting to 20f");
+            baseTime = 20f;
+        }
+        if (timeReductionPerLevel < 0)
+        {
+            Debug.LogError($"timeReductionPerLevel is invalid: {timeReductionPerLevel}, setting to 5f");
+            timeReductionPerLevel = 5f;
+        }
+        
         CurrentLevel = level;
         currentLevelScore = 0;
         usedHintThisLevel = false;
         
         // Tính thời gian dựa trên level
-        totalTime = Mathf.Max(baseTime - (level - 1) * timeReductionPerLevel, 120f); // Tối thiểu 2 phút
+        float calculatedTime = Mathf.Max(baseTime - (level - 1) * timeReductionPerLevel, 120f);
+        Debug.Log($"Calculated time: {calculatedTime:F1}s (baseTime: {baseTime} - (level-1)*{timeReductionPerLevel})");
+        
+        totalTime = calculatedTime;
         TimeLeft = totalTime;
+        
+        Debug.Log($"After StartLevel - totalTime: {totalTime:F1}s, TimeLeft: {TimeLeft:F1}s");
+        Debug.Log("=== START LEVEL COMPLETED ===");
         
         // Khởi tạo game board cho level mới
         if (BoardManager.Instance != null)
@@ -224,22 +247,40 @@ public class GameManager : Singleton<GameManager>
     // ================= LEVEL CONTROL =================
     public void RestartLevel()
     {
+        Debug.Log("=== RESTART LEVEL START ===");
+        Debug.Log($"RestartLevel called for level {CurrentLevel}");
+        Debug.Log($"Before reset - TimeLeft: {TimeLeft:F1}s, IsPlaying: {IsPlaying}, IsPaused: {IsPaused}");
+        Debug.Log($"CurrentState: {CurrentState}");
+        
         // Reset game state first
         IsPlaying = true;
         IsPaused = false;
         Time.timeScale = 1f;
+        Debug.Log($"After state reset - IsPlaying: {IsPlaying}, IsPaused: {IsPaused}, TimeScale: {Time.timeScale}");
         
         // Clear board and restart level
         if (BoardManager.Instance != null)
         {
+            Debug.Log("Clearing board...");
             BoardManager.Instance.ClearBoard();
+            Debug.Log("Board cleared successfully");
+        }
+        else
+        {
+            Debug.LogError("BoardManager.Instance is null!");
         }
         
+        Debug.Log("Calling StartLevel...");
         StartLevel(CurrentLevel);
+        Debug.Log($"After StartLevel - TimeLeft: {TimeLeft:F1}s, totalTime: {totalTime:F1}s");
+        
+        Debug.Log($"After reset - TimeLeft: {TimeLeft:F1}s, IsPlaying: {IsPlaying}, IsPaused: {IsPaused}");
         
         // Close all UI and open gameplay
         UIManager.Instance.CloseAll();
         UIManager.Instance.OpenUI<CanvasGamePlay>();
+        
+        Debug.Log("=== RESTART LEVEL COMPLETED ===");
     }
 
     public void LoadNextLevel()
