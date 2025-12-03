@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Item
   layers:
   - Default
   - TransparentFX
@@ -11,9 +12,9 @@ TagManager:
   - 
   - Water
   - UI
-  - Portrait
   - 
   - 
+  - Item
   - 
   - 
   - 
@@ -38,18 +39,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Background
-    uniqueID: 867880795
-    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Gems
-    uniqueID: 1890678711
-    locked: 0
-  - name: Character
-    uniqueID: 3183144165
-    locked: 0
-  - name: VFX
-    uniqueID: 666422525
+  - name: UI
+    uniqueID: 58496801
     locked: 0

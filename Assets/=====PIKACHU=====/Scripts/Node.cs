@@ -6,7 +6,6 @@ public class Node : MonoBehaviour
 {
     public NodeData node;
 
-    // Hàm khởi tạo custom (gọi sau Instantiate)
     public void Init(NodeData data)
     {
         node = data;

@@ -19,18 +19,14 @@ public class UIManager : Singleton<UIManager>
     // mo canvas
     public T OpenUI<T>() where T : UICanvas
     {
-        Debug.Log($"UIManager.OpenUI<{typeof(T).Name}> called");
         T canvas =  GetUI<T>();
         if (canvas != null)
         {
-            Debug.Log($"Canvas {typeof(T).Name} retrieved, calling Setup() and Open()");
             canvas.Setup();
             canvas.Open();
-            Debug.Log($"Canvas {typeof(T).Name} opened successfully");
         }
         else
         {
-            Debug.LogError($"Failed to get canvas {typeof(T).Name}");
         }
         return canvas;
     }
@@ -67,42 +63,33 @@ public class UIManager : Singleton<UIManager>
     // lay active canvas
     public T GetUI<T>() where T : UICanvas
     {
-        Debug.Log($"GetUI<{typeof(T).Name}> called");
         if (!IsUILoaded<T>())
         {
-            Debug.Log($"Canvas {typeof(T).Name} not loaded, creating new instance");
             T prefab = GetUIPrefab<T>();
             if (prefab != null)
             {
                 T canvas = Instantiate(prefab, parent);
                 canvasActives[typeof(T)] = canvas;
-                Debug.Log($"Canvas {typeof(T).Name} instantiated successfully");
             }
             else
             {
-                Debug.LogError($"Prefab for {typeof(T).Name} not found!");
                 return null;
             }
         }
         else
         {
-            Debug.Log($"Canvas {typeof(T).Name} already loaded");
         }
         return canvasActives[typeof(T)] as T;
     }
     private T GetUIPrefab<T>() where T : UICanvas
     {
-        Debug.Log($"GetUIPrefab<{typeof(T).Name}> called");
         if (canvasPrefabs.ContainsKey(typeof(T)))
         {
             var prefab = canvasPrefabs[typeof(T)] as T;
-            Debug.Log($"Prefab {typeof(T).Name} found: {prefab != null}");
             return prefab;
         }
         else
         {
-            Debug.LogError($"Prefab {typeof(T).Name} not found in canvasPrefabs!");
-            Debug.Log($"Available prefabs: {string.Join(", ", canvasPrefabs.Keys)}");
             return null;
         }
     }

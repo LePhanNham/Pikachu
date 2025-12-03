@@ -23,7 +23,6 @@ public class SoundManager : Singleton<SoundManager>
 
     private void Awake()
     {
-        // Ensure sources exist
         if (musicSource == null)
         {
             var go = new GameObject("MusicSource");
@@ -66,7 +65,6 @@ public class SoundManager : Singleton<SoundManager>
         sfxSource.PlayOneShot(clip, sfxVolume);
     }
 
-    // Convenience helpers
     public void Click() => PlaySfx(click);
     public void Match() => PlaySfx(match);
     public void NoMove() => PlaySfx(noMove);

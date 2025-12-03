@@ -1,90 +1,118 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class PathFinder : Singleton<PathFinder>
 {
+    private readonly int[] dx = { 0, 0, 1, -1 };
+    private readonly int[] dy = { 1, -1, 0, 0 };
+    private const int MAX_TURNS = 2;
 
-    public int[] dx = { 0, 0, 1, -1 };
-    public int[] dy = { 1, -1, 0, 0 };
-    public bool CanConnect(NodeData[,] board, int rows, int cols, NodeData start, NodeData end)
+    [Header("Debug")]
+    public LineRenderer lineRenderer;
+
+    private int rows, cols;
+    private bool[,,] visited; 
+    private (int x, int y, int dir)[,,] parents; 
+
+    public void Init(int r, int c)
     {
-        if (start.node != end.node || (start.posX == end.posX && start.posY == end.posY)) return false;
-        return BFS(board, rows, cols, start, end);
+        rows = r;
+        cols = c;
+        visited = new bool[rows, cols, 4];
+        parents = new (int, int, int)[rows, cols, 4];
     }
 
- 
-    public List<Vector3> GetPath(NodeData[,] board, int rows, int cols, NodeData start, NodeData end)
+    public bool CanConnect(NodeData[,] board, NodeData start, NodeData end)
     {
-        if (start.node != end.node || (start.posX == end.posX && start.posY == end.posY)) return new List<Vector3>();
-        
-        lastPath.Clear();
-        if (BFSWithPath(board, rows, cols, start, end))
+        if (!IsValidPair(start, end)) return false;
+        return RunBFS(board, start, end, out _);
+    }
+
+
+    public List<Vector3> GetPath(NodeData[,] board, NodeData start, NodeData end)
+    {
+        if (!IsValidPair(start, end)) return new List<Vector3>();
+
+        if (RunBFS(board, start, end, out var finalState))
         {
-            return new List<Vector3>(lastPath);
+            return ReconstructPath(start, end, finalState);
         }
         return new List<Vector3>();
     }
 
 
-    public int GetPathTurns(NodeData[,] board, int rows, int cols, NodeData start, NodeData end)
+    public int GetPathTurns(NodeData[,] board, NodeData start, NodeData end)
     {
-        if (start.node != end.node || (start.posX == end.posX && start.posY == end.posY)) return -1;
+        if (!IsValidPair(start, end)) return -1;
         
-        return BFSWithTurns(board, rows, cols, start, end);
+        if (RunBFS(board, start, end, out var finalState))
+        {
+            return finalState.turns;
+        }
+        return -1;
     }
 
-    public List<Vector3> lastPath = new List<Vector3>();
-    public LineRenderer lineRenderer;
-
-    public bool BFS(NodeData[,] board, int maxX, int maxY, NodeData start, NodeData end)
+    private bool IsValidPair(NodeData start, NodeData end)
     {
-        lastPath.Clear();
+        if (start == null || end == null) return false;
+        if (start.node != end.node) return false;
+        if (start.posX == end.posX && start.posY == end.posY) return false;
+        return true;
+    }
+
+    private struct SearchNode
+    {
+        public int x, y, dir, turns;
+    }
 
 
-        Queue<PathNode> q = new Queue<PathNode>();
-        Dictionary<(int,int,int), (int,int,int)> parent = new();
-        bool[,,] visited = new bool[maxX, maxY, 4];
+    private bool RunBFS(NodeData[,] board, NodeData start, NodeData end, out SearchNode finalState)
+    {
+        finalState = default;
+        
+        System.Array.Clear(visited, 0, visited.Length);
+
+        Queue<SearchNode> q = new Queue<SearchNode>();
 
         for (int d = 0; d < 4; d++)
         {
-            int nX = start.posX + dx[d];
-            int nY = start.posY + dy[d];
+            int nx = start.posX + dx[d];
+            int ny = start.posY + dy[d];
 
-            if (CheckInSide(nX, nY, maxX, maxY) &&
-                (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY)))
+            if (IsWalkable(board, nx, ny, end))
             {
-                q.Enqueue(new PathNode(nX, nY, d, 0));
-                visited[nX, nY, d] = true;
-                parent[(nX,nY,d)] = (start.posX, start.posY, -1);
+                q.Enqueue(new SearchNode { x = nx, y = ny, dir = d, turns = 0 });
+                visited[nx, ny, d] = true;
+                parents[nx, ny, d] = (start.posX, start.posY, -1); 
             }
         }
 
         while (q.Count > 0)
         {
-            PathNode cur = q.Dequeue();
+            var cur = q.Dequeue();
 
-            if (cur.x == end.posX && cur.y == end.posY && cur.turns <= 2)
+            if (cur.x == end.posX && cur.y == end.posY)
             {
+                finalState = cur;
                 return true;
             }
 
             for (int d = 0; d < 4; d++)
             {
-                int nX = cur.x + dx[d];
-                int nY = cur.y + dy[d];
-                int turns = cur.turns + (d == cur.dir ? 0 : 1);
+                int nx = cur.x + dx[d];
+                int ny = cur.y + dy[d];
+                
+                int newTurns = cur.turns + (d == cur.dir ? 0 : 1);
 
-                if (turns > 2) continue;
+                if (newTurns > MAX_TURNS) continue;
 
-                if (CheckInSide(nX, nY, maxX, maxY) && !visited[nX, nY, d])
+                if (IsInside(nx, ny) && !visited[nx, ny, d])
                 {
-                    if (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY))
+                    if (IsWalkable(board, nx, ny, end))
                     {
-                        visited[nX, nY, d] = true;
-                        q.Enqueue(new PathNode(nX, nY, d, turns));
-                        parent[(nX,nY,d)] = (cur.x, cur.y, cur.dir);
+                        visited[nx, ny, d] = true;
+                        q.Enqueue(new SearchNode { x = nx, y = ny, dir = d, turns = newTurns });
+                        parents[nx, ny, d] = (cur.x, cur.y, cur.dir);
                     }
                 }
             }
@@ -93,168 +121,53 @@ public class PathFinder : Singleton<PathFinder>
         return false;
     }
 
-
-
-    public bool CheckInSide(int x, int y, int rows, int cols)
+    private bool IsInside(int x, int y)
     {
         return x >= 0 && y >= 0 && x < rows && y < cols;
     }
 
-    /// <summary>
-    /// BFS với đường đi
-    /// </summary>
-    public bool BFSWithPath(NodeData[,] board, int maxX, int maxY, NodeData start, NodeData end)
+    private bool IsWalkable(NodeData[,] board, int x, int y, NodeData target)
     {
-        lastPath.Clear();
-
-        Queue<PathNode> q = new Queue<PathNode>();
-        Dictionary<(int,int,int), (int,int,int)> parent = new();
-        bool[,,] visited = new bool[maxX, maxY, 4];
-
-        for (int d = 0; d < 4; d++)
-        {
-            int nX = start.posX + dx[d];
-            int nY = start.posY + dy[d];
-
-            if (CheckInSide(nX, nY, maxX, maxY) &&
-                (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY)))
-            {
-                q.Enqueue(new PathNode(nX, nY, d, 0));
-                visited[nX, nY, d] = true;
-                parent[(nX,nY,d)] = (start.posX, start.posY, -1);
-            }
-        }
-
-        while (q.Count > 0)
-        {
-            PathNode cur = q.Dequeue();
-
-            if (cur.x == end.posX && cur.y == end.posY && cur.turns <= 2)
-            {
-                // Reconstruct path
-                ReconstructPath(parent, start, end, cur);
-                return true;
-            }
-
-            for (int d = 0; d < 4; d++)
-            {
-                int nX = cur.x + dx[d];
-                int nY = cur.y + dy[d];
-                int turns = cur.turns + (d == cur.dir ? 0 : 1);
-
-                if (turns > 2) continue;
-
-                if (CheckInSide(nX, nY, maxX, maxY) && !visited[nX, nY, d])
-                {
-                    if (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY))
-                    {
-                        visited[nX, nY, d] = true;
-                        q.Enqueue(new PathNode(nX, nY, d, turns));
-                        parent[(nX,nY,d)] = (cur.x, cur.y, cur.dir);
-                    }
-                }
-            }
-        }
-
-        return false;
+        if (!IsInside(x, y)) return false;
+        return board[x, y].state == NodeState.Empty || (x == target.posX && y == target.posY);
     }
 
-
-    public int BFSWithTurns(NodeData[,] board, int maxX, int maxY, NodeData start, NodeData end)
+    private List<Vector3> ReconstructPath(NodeData start, NodeData end, SearchNode finalNode)
     {
-        Queue<PathNode> q = new Queue<PathNode>();
-        bool[,,] visited = new bool[maxX, maxY, 4];
+        List<Vector3> path = new List<Vector3>();
 
-        for (int d = 0; d < 4; d++)
+        path.Add(BoardManager.Instance.GetWorldPosition(end.posX, end.posY));
+
+        int cx = finalNode.x;
+        int cy = finalNode.y;
+        int cd = finalNode.dir;
+
+        while (true)
         {
-            int nX = start.posX + dx[d];
-            int nY = start.posY + dy[d];
+            var p = parents[cx, cy, cd];
+            if (p.dir == -1) break; 
 
-            if (CheckInSide(nX, nY, maxX, maxY) &&
-                (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY)))
-            {
-                q.Enqueue(new PathNode(nX, nY, d, 0));
-                visited[nX, nY, d] = true;
-            }
+            path.Add(BoardManager.Instance.GetWorldPosition(p.x, p.y));
+            cx = p.x;
+            cy = p.y;
+            cd = p.dir;
         }
 
-        while (q.Count > 0)
-        {
-            PathNode cur = q.Dequeue();
-
-            if (cur.x == end.posX && cur.y == end.posY && cur.turns <= 2)
-            {
-                return cur.turns;
-            }
-
-            for (int d = 0; d < 4; d++)
-            {
-                int nX = cur.x + dx[d];
-                int nY = cur.y + dy[d];
-                int turns = cur.turns + (d == cur.dir ? 0 : 1);
-
-                if (turns > 2) continue;
-
-                if (CheckInSide(nX, nY, maxX, maxY) && !visited[nX, nY, d])
-                {
-                    if (board[nX, nY].state == NodeState.Empty || (nX == end.posX && nY == end.posY))
-                    {
-                        visited[nX, nY, d] = true;
-                        q.Enqueue(new PathNode(nX, nY, d, turns));
-                    }
-                }
-            }
-        }
-
-        return -1;
+        path.Add(BoardManager.Instance.GetWorldPosition(start.posX, start.posY));
+        
+        return path;
+    }
+    public void DrawDebugPath(List<Vector3> path)
+    {
+        if (lineRenderer == null || path.Count == 0) return;
+        
+        lineRenderer.positionCount = path.Count;
+        lineRenderer.SetPositions(path.ToArray());
+        lineRenderer.enabled = true;
     }
 
-
-    private void ReconstructPath(Dictionary<(int,int,int), (int,int,int)> parent, NodeData start, NodeData end, PathNode finalNode)
+    public void ClearDebugPath()
     {
-        lastPath.Clear();
-        
-        System.Func<int,int,Vector3> GridToWorld = (r, c) =>
-        {
-            float x = c * BoardManager.Instance.offsetX;
-            float y = -r * BoardManager.Instance.offsetY;
-            return new Vector3(x, y, 0);
-        };
-
-        // Thêm điểm cuối (center of cell)
-        lastPath.Add(GridToWorld(end.posX, end.posY));
-
-        // Tái tạo ngược từ điểm cuối về điểm đầu
-        (int x, int y, int dir) current = (finalNode.x, finalNode.y, finalNode.dir);
-        
-        while (parent.ContainsKey(current))
-        {
-            var prev = parent[current];
-            if (prev.Item3 == -1) break; // Đã đến điểm đầu
-            
-            lastPath.Insert(0, GridToWorld(prev.Item1, prev.Item2));
-            current = prev;
-        }
-        
-        // Thêm điểm đầu
-        lastPath.Insert(0, GridToWorld(start.posX, start.posY));
+        if (lineRenderer != null) lineRenderer.enabled = false;
     }
 }
-
-
-
-public class PathNode
-{
-    public int x, y;
-    public int dir;
-    public int turns;
-
-    public PathNode(int x, int y, int dir, int turn)
-    {
-        this.x = x;
-        this.y = y;
-        this.dir = dir;
-        this.turns = turn;
-    }
-}
-

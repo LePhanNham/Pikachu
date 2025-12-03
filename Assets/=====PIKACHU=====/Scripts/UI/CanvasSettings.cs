@@ -1,104 +1,112 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CanvasSettings : UICanvas
 {
-    [Header("Sound Controls")]
+    [Header("Audio Controls")]
     [SerializeField] private Slider musicSlider;
+    [SerializeField] private Toggle musicToggle;
+    [Space(5)]
     [SerializeField] private Slider sfxSlider;
-    [SerializeField] private Toggle musicToggle; // On = unmuted
-    [SerializeField] private Toggle sfxToggle;   // On = unmuted
+    [SerializeField] private Toggle sfxToggle;
 
     [Header("Navigation")]
     [SerializeField] private Button backButton;
 
-    private bool openedOverMainMenu = false;
-    private bool openedFromPause = false;
+    private Action onBackCallback;
 
     public override void Setup()
     {
         base.Setup();
+        InitializeAudioEvents();
+        InitializeNavigationEvents();
+        RefreshUIValues();
+    }
 
-        // Wire up events
-        if (musicSlider != null)
+
+    public void ConfigureBackNavigation(UICanvas previousCanvas)
+    {
+        // Define behavior based on who opened us
+        if (previousCanvas is CanvasMainMenu)
         {
-            musicSlider.onValueChanged.RemoveAllListeners();
-            musicSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+            onBackCallback = () => UIManager.Instance.OpenUI<CanvasMainMenu>();
         }
-        if (sfxSlider != null)
+        else if (previousCanvas is CanvasPause)
         {
-            sfxSlider.onValueChanged.RemoveAllListeners();
-            sfxSlider.onValueChanged.AddListener(OnSfxVolumeChanged);
+            onBackCallback = () => UIManager.Instance.OpenUI<CanvasPause>();
         }
-        if (musicToggle != null)
+        else
         {
-            musicToggle.onValueChanged.RemoveAllListeners();
-            musicToggle.onValueChanged.AddListener(OnMusicToggleChanged);
+            // Default fallback (e.g., if opened from Gameplay without pause)
+            onBackCallback = () => 
+            {
+                if (GameManager.Instance.CurrentState == GameState.Paused)
+                    UIManager.Instance.OpenUI<CanvasPause>();
+                else
+                    Close(0f);
+            };
         }
-        if (sfxToggle != null)
-        {
-            sfxToggle.onValueChanged.RemoveAllListeners();
-            sfxToggle.onValueChanged.AddListener(OnSfxToggleChanged);
-        }
+    }
+
+    // Maintained for backward compatibility with your existing SetState calls
+    public void SetState(UICanvas canvas) => ConfigureBackNavigation(canvas);
+
+    #region Initialization & UI Updates
+
+    private void InitializeAudioEvents()
+    {
+        BindSlider(musicSlider, SetMusicVolume);
+        BindSlider(sfxSlider, SetSfxVolume);
+        BindToggle(musicToggle, SetMusicMute);
+        BindToggle(sfxToggle, SetSfxMute);
+    }
+
+    private void InitializeNavigationEvents()
+    {
         if (backButton != null)
         {
             backButton.onClick.RemoveAllListeners();
             backButton.onClick.AddListener(OnBackClicked);
         }
-
-        SyncUIFromSound();
     }
 
-    // Called by whoever opens settings to inform context
-    public void SetState(UICanvas canvas)
-    {
-        Debug.Log($"CanvasSettings.SetState called with canvas: {canvas?.GetType().Name}");
-        openedOverMainMenu = canvas is CanvasMainMenu;
-        // Track if opened from pause menu
-        openedFromPause = canvas is CanvasPause;
-        Debug.Log($"Flags set - openedOverMainMenu: {openedOverMainMenu}, openedFromPause: {openedFromPause}");
-        
-        // Debug board state
-        if (BoardManager.Instance != null)
-        {
-            BoardManager.Instance.DebugBoardState();
-        }
-    }
-
-    private void SyncUIFromSound()
+    private void RefreshUIValues()
     {
         if (SoundManager.Instance == null) return;
-        var sm = SoundManager.Instance;
-        if (musicSlider != null) musicSlider.value = sm.musicVolume;
-        if (sfxSlider != null) sfxSlider.value = sm.sfxVolume;
-        if (musicToggle != null) musicToggle.isOn = !sm.muteMusic;
-        if (sfxToggle != null) sfxToggle.isOn = !sm.muteSfx;
+
+        UpdateSlider(musicSlider, SoundManager.Instance.musicVolume);
+        UpdateSlider(sfxSlider, SoundManager.Instance.sfxVolume);
+        UpdateToggle(musicToggle, !SoundManager.Instance.muteMusic);
+        UpdateToggle(sfxToggle, !SoundManager.Instance.muteSfx);
     }
 
-    private void OnMusicVolumeChanged(float value)
+    #endregion
+
+    #region Event Handlers
+
+    private void SetMusicVolume(float value)
     {
         if (SoundManager.Instance == null) return;
         SoundManager.Instance.musicVolume = value;
         SoundManager.Instance.ApplyVolumes();
     }
 
-    private void OnSfxVolumeChanged(float value)
+    private void SetSfxVolume(float value)
     {
         if (SoundManager.Instance == null) return;
         SoundManager.Instance.sfxVolume = value;
         SoundManager.Instance.ApplyVolumes();
     }
 
-    private void OnMusicToggleChanged(bool isOn)
+    private void SetMusicMute(bool isOn)
     {
         if (SoundManager.Instance == null) return;
-        SoundManager.Instance.muteMusic = !isOn;
+        SoundManager.Instance.muteMusic = !isOn; 
         SoundManager.Instance.ApplyVolumes();
     }
 
-    private void OnSfxToggleChanged(bool isOn)
+    private void SetSfxMute(bool isOn)
     {
         if (SoundManager.Instance == null) return;
         SoundManager.Instance.muteSfx = !isOn;
@@ -108,31 +116,41 @@ public class CanvasSettings : UICanvas
     private void OnBackClicked()
     {
         UIManager.Instance.CloseUIDirectly<CanvasSettings>();
-
-        // If opened over main menu, ensure main menu is visible
-        if (openedOverMainMenu)
-        {
-            UIManager.Instance.OpenUI<CanvasMainMenu>();
-            return;
-        }
-
-        // If opened from pause menu, go back to pause menu
-        if (openedFromPause)
-        {
-            UIManager.Instance.OpenUI<CanvasPause>();
-            return;
-        }
-
-        // If game is paused but not from pause menu, go back to pause menu
-        if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Paused)
-        {
-            UIManager.Instance.OpenUI<CanvasPause>();
-        }
-        // If from gameplay, just close settings (game continues)
+        onBackCallback?.Invoke();
     }
 
-    // Backward compatibility for UI bindings
+    #endregion
+
+    #region Helper Methods
+
+    private void BindSlider(Slider slider, UnityEngine.Events.UnityAction<float> action)
+    {
+        if (slider != null)
+        {
+            slider.onValueChanged.RemoveAllListeners();
+            slider.onValueChanged.AddListener(action);
+        }
+    }
+
+    private void BindToggle(Toggle toggle, UnityEngine.Events.UnityAction<bool> action)
+    {
+        if (toggle != null)
+        {
+            toggle.onValueChanged.RemoveAllListeners();
+            toggle.onValueChanged.AddListener(action);
+        }
+    }
+
+    private void UpdateSlider(Slider slider, float value)
+    {
+        if (slider != null) slider.value = value;
+    }
+
+    private void UpdateToggle(Toggle toggle, bool isOn)
+    {
+        if (toggle != null) toggle.isOn = isOn;
+    }
+
+    #endregion
     public void BackButton() => OnBackClicked();
-    public void NextButton() => Close(0);
-    public void MainMenuButton() => OnBackClicked();
 }

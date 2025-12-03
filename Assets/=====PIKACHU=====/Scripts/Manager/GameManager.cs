@@ -3,7 +3,6 @@ using System.Collections;
 
 public class GameManager : Singleton<GameManager>
 {
-    // Game state (not serialized)
     public GameState CurrentState { get; private set; }
     public int CurrentLevel { get; private set; } = 1;
     public int CurrentScore { get; private set; }
@@ -43,7 +42,6 @@ public class GameManager : Singleton<GameManager>
         CurrentLevel = 1;
         CurrentScore = 0;
         OnGameStateChanged?.Invoke(CurrentState);
-        // Play menu music
         SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmMenu);
     }
 
@@ -57,27 +55,17 @@ public class GameManager : Singleton<GameManager>
         
         StartLevel(CurrentLevel);
         OnGameStateChanged?.Invoke(CurrentState);
-        
-        Debug.Log("🎮 Bắt đầu game!");
         SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmGameplay);
     }
 
     public void StartLevel(int level)
     {
-        Debug.Log("=== START LEVEL START ===");
-        Debug.Log($"StartLevel called for level {level}");
-        Debug.Log($"Before StartLevel - totalTime: {totalTime:F1}s, TimeLeft: {TimeLeft:F1}s");
-        Debug.Log($"baseTime: {baseTime}, timeReductionPerLevel: {timeReductionPerLevel}");
-        
-        // Validate values
         if (baseTime <= 0)
         {
-            Debug.LogError($"baseTime is invalid: {baseTime}, setting to 20f");
             baseTime = 20f;
         }
         if (timeReductionPerLevel < 0)
         {
-            Debug.LogError($"timeReductionPerLevel is invalid: {timeReductionPerLevel}, setting to 5f");
             timeReductionPerLevel = 5f;
         }
         
@@ -85,27 +73,20 @@ public class GameManager : Singleton<GameManager>
         currentLevelScore = 0;
         usedHintThisLevel = false;
         
-        // Tính thời gian dựa trên level
         float calculatedTime = Mathf.Max(baseTime - (level - 1) * timeReductionPerLevel, 120f);
-        Debug.Log($"Calculated time: {calculatedTime:F1}s (baseTime: {baseTime} - (level-1)*{timeReductionPerLevel})");
         
         totalTime = calculatedTime;
         TimeLeft = totalTime;
         
-        Debug.Log($"After StartLevel - totalTime: {totalTime:F1}s, TimeLeft: {TimeLeft:F1}s");
-        Debug.Log("=== START LEVEL COMPLETED ===");
-        
-        // Khởi tạo game board cho level mới
+
         if (BoardManager.Instance != null)
         {
             if (level == 1)
             {
-                // Level đầu tiên: khởi tạo board mới
                 BoardManager.Instance.InitializeGameBoard();
             }
             else
             {
-                // Level tiếp theo: reset board
                 BoardManager.Instance.ResetGameBoard();
             }
         }
@@ -128,9 +109,12 @@ public class GameManager : Singleton<GameManager>
             TimeLeft = 0;
             GameOver();
         }
-    }
 
-    // ================= SCORE SYSTEM =================
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            BoardManager.Instance.ClearBoard();
+        }
+    }
     public void AddScore(int value, bool isQuickMatch = false, bool usedHint = false)
     {
         int bonus = 0;
@@ -145,18 +129,14 @@ public class GameManager : Singleton<GameManager>
         OnScoreChanged?.Invoke(CurrentScore);
         
         string bonusText = bonus > 0 ? $" (+{bonus} bonus)" : "";
-        Debug.Log($"💰 +{totalScore} điểm{bonusText}");
         
-        // Không tự động qua level bằng điểm. Chỉ thắng khi ăn hết board (BoardManager gọi Victory)
     }
 
     public void UseHint()
     {
         usedHintThisLevel = true;
-        Debug.Log("💡 Đã sử dụng gợi ý");
     }
 
-    // ================= GAME STATE CONTROL =================
     public void PauseGame()
     {
         if (CurrentState != GameState.Playing) return;
@@ -166,7 +146,6 @@ public class GameManager : Singleton<GameManager>
         OnGameStateChanged?.Invoke(CurrentState);
         
         Time.timeScale = 0f;
-        Debug.Log("⏸️ Game tạm dừng");
     }
 
     public void ResumeGame()
@@ -178,7 +157,6 @@ public class GameManager : Singleton<GameManager>
         OnGameStateChanged?.Invoke(CurrentState);
         
         Time.timeScale = 1f;
-        Debug.Log("▶️ Tiếp tục game");
     }
 
     public void GameOver()
@@ -190,8 +168,6 @@ public class GameManager : Singleton<GameManager>
         OnGameStateChanged?.Invoke(CurrentState);
         
         Time.timeScale = 1f;
-        Debug.Log("⏰ Hết giờ! Game Over!");
-        
         UIManager.Instance.OpenUI<CanvasDefeat>();
     }
 
@@ -203,7 +179,6 @@ public class GameManager : Singleton<GameManager>
         CurrentState = GameState.Victory;
         OnGameStateChanged?.Invoke(CurrentState);
         
-        Debug.Log("🎉 Chiến thắng level!");
         
         if (CurrentLevel >= maxLevel)
         {
@@ -217,7 +192,6 @@ public class GameManager : Singleton<GameManager>
 
     private void LevelComplete()
     {
-        Debug.Log($"🎯 Hoàn thành Level {CurrentLevel} với {currentLevelScore} điểm!");
         
         if (CurrentLevel >= maxLevel)
         {
@@ -225,7 +199,6 @@ public class GameManager : Singleton<GameManager>
         }
         else
         {
-            // Tự động chuyển level sau 2 giây
             StartCoroutine(NextLevelAfterDelay(2f));
         }
     }
@@ -244,43 +217,21 @@ public class GameManager : Singleton<GameManager>
         UIManager.Instance.OpenUI<CanvasVictory>();
     }
 
-    // ================= LEVEL CONTROL =================
     public void RestartLevel()
     {
-        Debug.Log("=== RESTART LEVEL START ===");
-        Debug.Log($"RestartLevel called for level {CurrentLevel}");
-        Debug.Log($"Before reset - TimeLeft: {TimeLeft:F1}s, IsPlaying: {IsPlaying}, IsPaused: {IsPaused}");
-        Debug.Log($"CurrentState: {CurrentState}");
-        
-        // Reset game state first
         IsPlaying = true;
         IsPaused = false;
         Time.timeScale = 1f;
-        Debug.Log($"After state reset - IsPlaying: {IsPlaying}, IsPaused: {IsPaused}, TimeScale: {Time.timeScale}");
         
-        // Clear board and restart level
         if (BoardManager.Instance != null)
         {
-            Debug.Log("Clearing board...");
             BoardManager.Instance.ClearBoard();
-            Debug.Log("Board cleared successfully");
         }
-        else
-        {
-            Debug.LogError("BoardManager.Instance is null!");
-        }
+
         
-        Debug.Log("Calling StartLevel...");
         StartLevel(CurrentLevel);
-        Debug.Log($"After StartLevel - TimeLeft: {TimeLeft:F1}s, totalTime: {totalTime:F1}s");
-        
-        Debug.Log($"After reset - TimeLeft: {TimeLeft:F1}s, IsPlaying: {IsPlaying}, IsPaused: {IsPaused}");
-        
-        // Close all UI and open gameplay
         UIManager.Instance.CloseAll();
         UIManager.Instance.OpenUI<CanvasGamePlay>();
-        
-        Debug.Log("=== RESTART LEVEL COMPLETED ===");
     }
 
     public void LoadNextLevel()
@@ -301,12 +252,10 @@ public class GameManager : Singleton<GameManager>
         CurrentState = GameState.MainMenu;
         OnGameStateChanged?.Invoke(CurrentState);
         
-        // Reset game state
         IsPlaying = false;
         IsPaused = false;
         Time.timeScale = 1f;
         
-        // Clear board if exists
         if (BoardManager.Instance != null)
         {
             BoardManager.Instance.ClearBoard();
@@ -319,7 +268,6 @@ public class GameManager : Singleton<GameManager>
         SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmMenu);
     }
 
-    // ================= UTILITY =================
     public float GetTimeProgress()
     {
         return totalTime > 0 ? TimeLeft / totalTime : 0f;

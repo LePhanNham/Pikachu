@@ -319,7 +319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4920bded8aecdab4ea6043e02110a107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseTime: 300
+  baseTime: 20
   timeReductionPerLevel: 10
   scoreTargetPerLevel: 1000
   maxLevel: 10

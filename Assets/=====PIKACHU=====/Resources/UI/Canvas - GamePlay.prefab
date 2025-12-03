@@ -750,7 +750,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -883,8 +883,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isDestroyOnClose: 0
   timerFill: {fileID: 8694869117407530217}
-  text: {fileID: 6643538054191542235}
+  levelText: {fileID: 0}
   pauseButton: {fileID: 9099281003608730330}
+  settingsButton: {fileID: 0}
   hintButton: {fileID: 4659808908298818828}
   shuffleButton: {fileID: 3821393315322981405}
 --- !u!1 &4203295786250139259

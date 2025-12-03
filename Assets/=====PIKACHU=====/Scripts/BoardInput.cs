@@ -1,49 +1,53 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class BoardInput : MonoBehaviour
 {
+    private Camera mainCamera;
+
+    private void Start()
+    {
+        mainCamera = Camera.main;
+    }
+
     void Update()
     {
-        // Chỉ cho phép input khi game đang playing VÀ không có UI nào đang mở
-        if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Playing)
+        if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Playing) 
             return;
-            
-        // Kiểm tra xem có UI nào đang mở không (Settings, Pause, etc.)
-        if (UIManager.Instance != null && UIManager.Instance.HasAnyUIOpen())
-        {
-            Debug.Log("Input blocked - UI is open");
+
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
             return;
-        }
 
         if (Input.GetMouseButtonDown(0))
         {
-            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector2 mousePos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+            HandleClick();
+        }
+    }
 
-            RaycastHit2D hit = Physics2D.Raycast(mousePos2D, Vector2.zero);
-            if (hit.collider != null)
+    private void HandleClick()
+    {
+        Vector2 mousePos = mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.Raycast(mousePos, Vector2.zero);
+
+        if (hit.collider != null)
+        {
+            if (hit.collider.TryGetComponent<Node>(out var nodeComponent))
             {
-                Node node = hit.collider.GetComponent<Node>();
-                if (node != null && node.node != null && node.node.state == NodeState.Normal && node.node.tileObject != null && node.node.tileObject.activeSelf)
-                {
-                    Debug.Log($"Click tile at ({node.node.posX}, {node.node.posY}) - State: {node.node.state}");
-                    BoardManager.Instance.SelectTile(node.node.posX, node.node.posY);
-                }
-                else
-                {
-                    if (node == null) Debug.Log("Node component is null");
-                    else if (node.node == null) Debug.Log("NodeData is null");
-                    else if (node.node.state != NodeState.Normal) Debug.Log($"Tile state is {node.node.state}, not Normal");
-                    else if (node.node.tileObject == null) Debug.Log("TileObject is null");
-                    else if (!node.node.tileObject.activeSelf) Debug.Log("TileObject is not active");
-                }
+                ValidateAndSelect(nodeComponent);
             }
-            else
-            {
-                Debug.Log("No collider hit");
-            }
+        }
+    }
+
+    private void ValidateAndSelect(Node nodeComponent)
+    {
+        var data = nodeComponent.node;
+
+        if (data != null && 
+            data.state == NodeState.Normal && 
+            data.tileObject != null && 
+            data.tileObject.activeSelf)
+        {
+            BoardManager.Instance.SelectTile(data.posX, data.posY);
         }
     }
 }
