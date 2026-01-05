@@ -4,14 +4,6 @@ using UnityEngine.UI;
 public class CanvasDefeat : UICanvas
 {
 
-
-    // Gọi khi mở CanvasDefeat
-    public override void Setup()
-    {
-        base.Setup();
-    }
-
-
     public void RetryButton()
     {
         // Load lại màn chơi

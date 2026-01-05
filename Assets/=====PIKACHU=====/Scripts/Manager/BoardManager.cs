@@ -16,7 +16,6 @@ public class BoardManager : Singleton<BoardManager>
     [Header("Assets")]
     public GameObject[] iconSprite;
 
-    // State
     public NodeData[,] board;
     public GameObject[,] tiles;
     private NodeData firstSelect;
@@ -27,19 +26,43 @@ public class BoardManager : Singleton<BoardManager>
     {
         if (PathFinder.Instance != null) PathFinder.Instance.Init(rows, cols);
         
-        // Cấu hình mặc định cho DOTween để an toàn
         DOTween.SetTweensCapacity(500, 50);
     }
 
-    #region Init & Reset (Giữ nguyên logic cũ)
+    private void OnEnable()
+    {
+        GameManager.Instance.OnShuffleChanged += ShuffleBoard;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.Instance.OnShuffleChanged -= ShuffleBoard;
+    }
+
+    #region Init & Reset
     public void InitializeGameBoard() { InitGrid(); CreateBoard(); }
     public void ResetGameBoard() { ClearBoard(); InitializeGameBoard(); firstSelect = null; comboCount = 0; }
     
     public void ClearBoard()
     {
-        if (tiles == null) return;
-        foreach (var tile in tiles) if (tile != null) Destroy(tile);
-        board = null; tiles = null;
+        if (tiles == null || board == null) return;
+
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (board[r, c] != null)
+                {
+                    board[r, c].state = NodeState.Empty;
+                }
+                if (tiles[r, c] != null)
+                {
+                    tiles[r, c].SetActive(false);
+                }
+            }
+        }
+        firstSelect = null;
+        comboCount = 0;
     }
 
     private void InitGrid()
@@ -162,7 +185,6 @@ public class BoardManager : Singleton<BoardManager>
         bool isQuick = (Time.time - lastMatchTime) < quickMatchThreshold;
         
         comboCount++;
-        GameManager.Instance.AddScore(baseScore, isQuick, false);
         lastMatchTime = Time.time;
         SoundManager.Instance?.Match();
         StartCoroutine(RoutineMatchSequence(nodeA, nodeB));
@@ -303,7 +325,7 @@ public class BoardManager : Singleton<BoardManager>
 
     private void Update()
     {
-        if (GameManager.Instance.CurrentState == GameState.Playing&&IsBoardCleared())
+        if (GameManager.Instance.currentState == GameState.Playing&&IsBoardCleared())
         {
             GameManager.Instance.Victory();
         }

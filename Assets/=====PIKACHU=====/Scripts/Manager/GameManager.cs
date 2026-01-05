@@ -1,35 +1,37 @@
 using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
+using System;
 public class GameManager : Singleton<GameManager>
 {
-    public GameState CurrentState { get; private set; }
-    public int CurrentLevel { get; private set; } = 1;
-    public int CurrentScore { get; private set; }
-    public float TimeLeft { get; private set; }
-    public bool IsPlaying { get; private set; }
-    public bool IsPaused { get; private set; }
+    public GameState currentState { get; private set; }
+    public int currentLevel { get; private set; } = 1;
+    public float timeLeft { get; private set; }
+    public bool isPlaying { get; private set; }
+    public bool isPaused { get; private set; }
+    public bool isContinue;
 
     [Header("Level Settings")]
-    [SerializeField] private float baseTime = 20f; // 20 giây để test
-    [SerializeField] private float timeReductionPerLevel = 5f; // Giảm 5s mỗi level
-    [SerializeField] private int scoreTargetPerLevel = 1000; // Điểm cần đạt để qua level
-    [SerializeField] private int maxLevel = 10;
+    [SerializeField] public List<LevelData> levelDatas;
+    public int totalTime;
+    private int _hint;
+    private int _changes;
 
-    [Header("Scoring")]
-    [SerializeField] private int baseScorePerMatch = 100;
-    [SerializeField] private int bonusScoreForQuickMatch = 50;
-    [SerializeField] private int bonusScoreForNoHint = 25;
+    public Action<GameState> OnGameStateChanged;
+    public Action<float> OnTimeChanged;
+    public Action<int> OnLevelChanged;
+    public Action OnHintChanged;
+    public Action OnShuffleChanged;
 
-    private float totalTime;
-    private int currentLevelScore;
-    private bool usedHintThisLevel;
+    private void OnEnable()
+    {
+        OnHintChanged += UseHint;
+    }
 
-    // Events
-    public System.Action<GameState> OnGameStateChanged;
-    public System.Action<int> OnScoreChanged;
-    public System.Action<float> OnTimeChanged;
-    public System.Action<int> OnLevelChanged;
+    private void OnDisable()
+    {
+        OnHintChanged -= UseHint;
+    }
 
     private void Start()
     {
@@ -38,47 +40,29 @@ public class GameManager : Singleton<GameManager>
 
     private void InitializeGame()
     {
-        CurrentState = GameState.MainMenu;
-        CurrentLevel = 1;
-        CurrentScore = 0;
-        OnGameStateChanged?.Invoke(CurrentState);
+        currentState = GameState.MainMenu;
+        currentLevel = 0;
+        OnGameStateChanged?.Invoke(currentState);
         SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmMenu);
     }
 
     public void StartGame()
     {
-        CurrentState = GameState.Playing;
-        CurrentLevel = 1;
-        CurrentScore = 0;
-        IsPlaying = true;
-        IsPaused = false;
-        
-        StartLevel(CurrentLevel);
-        OnGameStateChanged?.Invoke(CurrentState);
+        currentState = GameState.Playing;
+        currentLevel = 1;
+        isPlaying = true;
+        isPaused = false;
+        StartLevel(currentLevel);
+        OnGameStateChanged?.Invoke(currentState);
         SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmGameplay);
     }
 
     public void StartLevel(int level)
     {
-        if (baseTime <= 0)
-        {
-            baseTime = 20f;
-        }
-        if (timeReductionPerLevel < 0)
-        {
-            timeReductionPerLevel = 5f;
-        }
-        
-        CurrentLevel = level;
-        currentLevelScore = 0;
-        usedHintThisLevel = false;
-        
-        float calculatedTime = Mathf.Max(baseTime - (level - 1) * timeReductionPerLevel, 120f);
-        
-        totalTime = calculatedTime;
-        TimeLeft = totalTime;
-        
-
+        currentLevel = level;
+        _hint = levelDatas[level].Suggestions;
+        _changes = levelDatas[level].Changes;
+        timeLeft = levelDatas[currentLevel].timeLimit;
         if (BoardManager.Instance != null)
         {
             if (level == 1)
@@ -91,22 +75,20 @@ public class GameManager : Singleton<GameManager>
             }
         }
         
-        OnLevelChanged?.Invoke(CurrentLevel);
-        OnTimeChanged?.Invoke(TimeLeft);
-        
-        Debug.Log($"🚀 Bắt đầu Level {level} - Thời gian: {TimeLeft:F0}s");
+        OnLevelChanged?.Invoke(currentLevel);
+        OnTimeChanged?.Invoke(timeLeft);
     }
 
     private void Update()
     {
-        if (CurrentState != GameState.Playing || IsPaused) return;
+        if (currentState != GameState.Playing || isPaused) return;
 
-        TimeLeft -= Time.deltaTime;
-        OnTimeChanged?.Invoke(TimeLeft);
+        timeLeft -= Time.deltaTime;
+        OnTimeChanged?.Invoke(timeLeft);
         
-        if (TimeLeft <= 0)
+        if (timeLeft <= 0)
         {
-            TimeLeft = 0;
+            timeLeft = 0;
             GameOver();
         }
 
@@ -115,72 +97,56 @@ public class GameManager : Singleton<GameManager>
             BoardManager.Instance.ClearBoard();
         }
     }
-    public void AddScore(int value, bool isQuickMatch = false, bool usedHint = false)
-    {
-        int bonus = 0;
-        
-        if (isQuickMatch) bonus += bonusScoreForQuickMatch;
-        if (!usedHint && !usedHintThisLevel) bonus += bonusScoreForNoHint;
-        
-        int totalScore = value + bonus;
-        CurrentScore += totalScore;
-        currentLevelScore += totalScore;
-        
-        OnScoreChanged?.Invoke(CurrentScore);
-        
-        string bonusText = bonus > 0 ? $" (+{bonus} bonus)" : "";
-        
-    }
-
     public void UseHint()
     {
-        usedHintThisLevel = true;
+        if (_hint>0)
+        {
+            _hint--;
+        }
     }
 
     public void PauseGame()
     {
-        if (CurrentState != GameState.Playing) return;
+        if (currentState != GameState.Playing) return;
         
-        IsPaused = true;
-        CurrentState = GameState.Paused;
-        OnGameStateChanged?.Invoke(CurrentState);
+        isPaused = true;
+        currentState = GameState.Paused;
+        OnGameStateChanged?.Invoke(currentState);
         
         Time.timeScale = 0f;
     }
 
     public void ResumeGame()
     {
-        if (CurrentState != GameState.Paused) return;
+        if (currentState != GameState.Paused) return;
         
-        IsPaused = false;
-        CurrentState = GameState.Playing;
-        OnGameStateChanged?.Invoke(CurrentState);
+        isPaused = false;
+        currentState = GameState.Playing;
+        OnGameStateChanged?.Invoke(currentState);
         
         Time.timeScale = 1f;
     }
 
     public void GameOver()
     {
-        if (CurrentState != GameState.Playing) return;
-        
-        IsPlaying = false;
-        CurrentState = GameState.GameOver;
-        OnGameStateChanged?.Invoke(CurrentState);
-        
+        if (currentState != GameState.Playing) return;
+        isPlaying = false;
+        currentState = GameState.GameOver;
+        OnGameStateChanged?.Invoke(currentState);
         Time.timeScale = 1f;
         UIManager.Instance.OpenUI<CanvasDefeat>();
     }
 
     public void Victory()
     {
-        if (CurrentState != GameState.Playing) return;
+        if (currentState != GameState.Playing) return;
         
-        IsPlaying = false;
-        CurrentState = GameState.Victory;
-        OnGameStateChanged?.Invoke(CurrentState);
+        isPlaying = false;
+        currentState = GameState.Victory;
+        OnGameStateChanged?.Invoke(currentState);
         
         
-        if (CurrentLevel >= maxLevel)
+        if (currentLevel >= levelDatas.Count)
         {
             GameComplete();
         }
@@ -193,7 +159,7 @@ public class GameManager : Singleton<GameManager>
     private void LevelComplete()
     {
         
-        if (CurrentLevel >= maxLevel)
+        if (currentLevel >= levelDatas.Count)
         {
             GameComplete();
         }
@@ -211,16 +177,15 @@ public class GameManager : Singleton<GameManager>
 
     private void GameComplete()
     {
-        CurrentState = GameState.GameComplete;
-        OnGameStateChanged?.Invoke(CurrentState);
-        Debug.Log("🏆 Chúc mừng! Bạn đã hoàn thành tất cả levels!");
+        currentState = GameState.GameComplete;
+        OnGameStateChanged?.Invoke(currentState);
         UIManager.Instance.OpenUI<CanvasVictory>();
     }
 
     public void RestartLevel()
     {
-        IsPlaying = true;
-        IsPaused = false;
+        isPlaying = true;
+        isPaused = false;
         Time.timeScale = 1f;
         
         if (BoardManager.Instance != null)
@@ -229,16 +194,16 @@ public class GameManager : Singleton<GameManager>
         }
 
         
-        StartLevel(CurrentLevel);
+        StartLevel(currentLevel);
         UIManager.Instance.CloseAll();
         UIManager.Instance.OpenUI<CanvasGamePlay>();
     }
 
     public void LoadNextLevel()
     {
-        if (CurrentLevel < maxLevel)
+        if (currentLevel < levelDatas.Count)
         {
-            StartLevel(CurrentLevel + 1);
+            StartLevel(currentLevel + 1);
             UIManager.Instance.CloseUIDirectly<CanvasVictory>();
         }
         else
@@ -249,11 +214,11 @@ public class GameManager : Singleton<GameManager>
 
     public void LoadHome()
     {
-        CurrentState = GameState.MainMenu;
-        OnGameStateChanged?.Invoke(CurrentState);
+        currentState = GameState.MainMenu;
+        OnGameStateChanged?.Invoke(currentState);
         
-        IsPlaying = false;
-        IsPaused = false;
+        isPlaying = false;
+        isPaused = false;
         Time.timeScale = 1f;
         
         if (BoardManager.Instance != null)
@@ -264,23 +229,21 @@ public class GameManager : Singleton<GameManager>
         UIManager.Instance.CloseAll();
         UIManager.Instance.OpenUI<CanvasMainMenu>();
         
-        Debug.Log("🏠 Về Main Menu");
         SoundManager.Instance.PlayMusic(SoundManager.Instance.bgmMenu);
     }
 
     public float GetTimeProgress()
     {
-        return totalTime > 0 ? TimeLeft / totalTime : 0f;
-    }
-
-    public int GetScoreProgress()
-    {
-        return scoreTargetPerLevel > 0 ? Mathf.Min(currentLevelScore * 100 / scoreTargetPerLevel, 100) : 0;
+        return totalTime > 0 ? timeLeft / totalTime : 0f;
     }
 
     public bool CanUseHint()
     {
-        return !usedHintThisLevel && CurrentState == GameState.Playing;
+        return _hint>0 && currentState == GameState.Playing;
+    }
+    public bool CanUseShuffle()
+    {
+        return _changes>0 && currentState == GameState.Playing;
     }
 }
 

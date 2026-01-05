@@ -5,8 +5,8 @@ using TMPro;
 public class CanvasGamePlay : UICanvas
 {
     [Header("HUD Elements")]
-    [SerializeField] private Image timerFill;
-    [SerializeField] private TextMeshProUGUI levelText; // Renamed from 'text' for clarity
+    [SerializeField] private Slider timerFill;
+    [SerializeField] private TextMeshProUGUI levelText; 
 
     [Header("Interactions")]
     [SerializeField] private Button pauseButton;
@@ -18,20 +18,16 @@ public class CanvasGamePlay : UICanvas
     {
         base.Setup();
         
-        // Use helper to bind buttons (cleaner Setup)
         BindButton(pauseButton, OnPauseClicked);
         BindButton(settingsButton, OnSettingsClicked);
         BindButton(hintButton, OnHintClicked);
         BindButton(shuffleButton, OnShuffleClicked);
-
-        // Initial UI State
         RefreshLevelDisplay();
     }
 
     private void Update()
     {
-        // Only update timer if game is actively playing
-        if (GameManager.Instance != null && GameManager.Instance.CurrentState == GameState.Playing)
+        if (GameManager.Instance != null && GameManager.Instance.currentState == GameState.Playing)
         {
             UpdateTimerVisuals();
         }
@@ -43,12 +39,7 @@ public class CanvasGamePlay : UICanvas
     {
         if (timerFill != null)
         {
-            timerFill.fillAmount = GameManager.Instance.GetTimeProgress();
-            
-            if (timerFill.fillAmount < 0.2f) 
-                timerFill.color = Color.red;
-            else 
-                timerFill.color = Color.white; 
+            timerFill.value = GameManager.Instance.GetTimeProgress();
         }
     }
 
@@ -56,7 +47,6 @@ public class CanvasGamePlay : UICanvas
     {
         if (levelText != null && GameManager.Instance != null)
         {
-            // levelText.text = $"Level {GameManager.Instance.CurrentLevel}";
         }
     }
 
@@ -68,15 +58,13 @@ public class CanvasGamePlay : UICanvas
     {
         if (GameManager.Instance == null) return;
 
-        // Determine action based on state
-        if (GameManager.Instance.CurrentState == GameState.Playing)
+        if (GameManager.Instance.currentState == GameState.Playing)
         {
             GameManager.Instance.PauseGame();
             UIManager.Instance.OpenUI<CanvasPause>();
         }
-        else if (GameManager.Instance.CurrentState == GameState.Paused)
+        else if (GameManager.Instance.currentState == GameState.Paused)
         {
-            // Edge case: If user somehow clicks this while paused (usually blocked by Pause Canvas)
             UIManager.Instance.CloseUIDirectly<CanvasPause>();
             GameManager.Instance.ResumeGame();
         }
@@ -84,7 +72,6 @@ public class CanvasGamePlay : UICanvas
 
     private void OnSettingsClicked()
     {
-        // Open Settings and pass 'this' so Settings knows to come back here
         var settingsCanvas = UIManager.Instance.OpenUI<CanvasSettings>();
         if (settingsCanvas != null)
         {
@@ -96,7 +83,7 @@ public class CanvasGamePlay : UICanvas
     {
         if (GameManager.Instance != null && GameManager.Instance.CanUseHint())
         {
-            GameManager.Instance.UseHint();
+            GameManager.Instance.OnHintChanged?.Invoke();
             BoardManager.Instance.AutoSelectBestPair();
             SoundManager.Instance?.Click();
         }
@@ -108,8 +95,8 @@ public class CanvasGamePlay : UICanvas
 
     private void OnShuffleClicked()
     {
-        // In a real game, you might want to check GameManager.CanUseShuffle() here first
-        BoardManager.Instance.ShuffleBoard();
+        if (GameManager.Instance != null && GameManager.Instance.CanUseShuffle())
+        GameManager.Instance.OnShuffleChanged?.Invoke();
         SoundManager.Instance?.Click();
     }
 

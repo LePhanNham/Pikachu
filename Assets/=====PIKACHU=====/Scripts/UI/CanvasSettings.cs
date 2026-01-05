@@ -27,7 +27,6 @@ public class CanvasSettings : UICanvas
 
     public void ConfigureBackNavigation(UICanvas previousCanvas)
     {
-        // Define behavior based on who opened us
         if (previousCanvas is CanvasMainMenu)
         {
             onBackCallback = () => UIManager.Instance.OpenUI<CanvasMainMenu>();
@@ -38,10 +37,9 @@ public class CanvasSettings : UICanvas
         }
         else
         {
-            // Default fallback (e.g., if opened from Gameplay without pause)
             onBackCallback = () => 
             {
-                if (GameManager.Instance.CurrentState == GameState.Paused)
+                if (GameManager.Instance.currentState == GameState.Paused)
                     UIManager.Instance.OpenUI<CanvasPause>();
                 else
                     Close(0f);
@@ -49,7 +47,6 @@ public class CanvasSettings : UICanvas
         }
     }
 
-    // Maintained for backward compatibility with your existing SetState calls
     public void SetState(UICanvas canvas) => ConfigureBackNavigation(canvas);
 
     #region Initialization & UI Updates

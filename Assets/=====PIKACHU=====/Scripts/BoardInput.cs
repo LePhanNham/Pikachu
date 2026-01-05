@@ -12,7 +12,7 @@ public class BoardInput : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance == null || GameManager.Instance.CurrentState != GameState.Playing) 
+        if (GameManager.Instance == null || GameManager.Instance.currentState != GameState.Playing) 
             return;
 
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
