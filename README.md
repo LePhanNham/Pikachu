@@ -25,7 +25,7 @@
 
 **Chức năng:**
 - **Play Game**: Bắt đầu game mới
-- **Settings**: Cài đặt âm thanh, đồ họa
+- **Settings**: Cài đặt âm thanh
 - **Quit**: Thoát game
 
 ---
@@ -47,7 +47,6 @@
 **Thông tin hiển thị:**
 - **Level**: Hiện tại đang chơi
 - **Timer**: Thời gian còn lại (giảm theo level)
-- **Score Progress**: Điểm hiện tại / Điểm cần đạt
 - **Buttons**: Pause, Hint, Shuffle
 
 #### 2.2 Gameplay Loop
@@ -61,20 +60,6 @@
    ├─ ✅ CÓ: Tiếp tục chơi
    └─ ❌ KHÔNG: Shuffle board + Reset combo
 ```
-
-#### 2.3 Scoring System
-```
-Base Score per Match: 100 điểm
-Bonus System:
-├─ Đường thẳng (0 rẽ): +0 bonus
-├─ 1 lần rẽ: +50 bonus
-├─ 2 lần rẽ: +100 bonus
-├─ Quick Match (<3s): +50 bonus
-├─ Combo: +25 điểm mỗi combo
-└─ No Hint: +25 bonus
-```
-
----
 
 ### 3. **PAUSE MENU** ⏸️
 ```
@@ -109,9 +94,6 @@ Bonus System:
 ```
 
 **Thông tin hiển thị:**
-- Điểm đạt được
-- Bonus thời gian
-- Tổng điểm
 - Nút chuyển level tiếp theo
 
 ---
@@ -121,7 +103,7 @@ Bonus System:
 ┌─────────────────────────────────────┐
 │           TIME'S UP!                │
 │                                     │
-│         Final Score: 850            │
+│  
 │         Level Reached: 3            │
 │                                     │
 │         [RESTART LEVEL]             │
@@ -130,7 +112,6 @@ Bonus System:
 ```
 
 **Thông tin hiển thị:**
-- Điểm cuối cùng
 - Level đã đạt được
 - Nút chơi lại hoặc về menu
 
@@ -139,17 +120,9 @@ Bonus System:
 ## 🎯 HỆ THỐNG LEVEL
 
 ### Level Progression
-```
-Level 1: 5:00 - Target: 1000 điểm
-Level 2: 4:50 - Target: 1200 điểm
-Level 3: 4:40 - Target: 1400 điểm
-...
-Level 10: 3:00 - Target: 2800 điểm
-```
 
 ### Difficulty Scaling
 - **Thời gian**: Giảm 10 giây mỗi level
-- **Điểm cần đạt**: Tăng 200 điểm mỗi level
 - **Board size**: Có thể tăng từ 8x8 lên 10x10 ở level cao
 
 ---
@@ -160,7 +133,7 @@ Level 10: 3:00 - Target: 2800 điểm
 1. **Auto-detect**: Tự động tìm tất cả cặp có thể nối
 2. **Best Pair**: Gợi ý cặp có đường đi ngắn nhất
 3. **Visual Hint**: Highlight 2 ô và hiển thị đường đi
-4. **Cost**: Mỗi level chỉ được dùng 1 lần
+4. **Cost**: Mỗi level chỉ được dùng số lần định sẵnsẵn
 
 ### Thuật toán Hint
 ```
