@@ -3,7 +3,7 @@
 --- !u!129 &1
 PlayerSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 26
+  serializedVersion: 28
   productGUID: 2a1acf9d3e67d124a989533673026799
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
@@ -49,6 +49,7 @@ PlayerSettings:
   m_StereoRenderingPath: 0
   m_ActiveColorSpace: 0
   unsupportedMSAAFallback: 0
+  m_SpriteBatchMaxVertexCount: 65535
   m_SpriteBatchVertexThreshold: 300
   m_MTRendering: 1
   mipStripping: 0
@@ -69,21 +70,24 @@ PlayerSettings:
   androidStartInFullscreen: 1
   androidRenderOutsideSafeArea: 0
   androidUseSwappy: 0
+  androidDisplayOptions: 1
   androidBlitType: 0
-  androidResizableWindow: 0
+  androidResizeableActivity: 0
   androidDefaultWindowWidth: 1920
   androidDefaultWindowHeight: 1080
   androidMinimumWindowWidth: 400
   androidMinimumWindowHeight: 300
   androidFullscreenMode: 1
   androidAutoRotationBehavior: 1
+  androidPredictiveBackSupport: 1
+  androidApplicationEntry: 1
   defaultIsNativeResolution: 0
   macRetinaSupport: 1
   runInBackground: 1
-  captureSingleScreen: 0
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
   Force IOS Speakers When Recording: 0
+  audioSpatialExperience: 0
   deferSystemGesturesMode: 0
   hideHomeButton: 0
   submitAnalytics: 1
@@ -96,6 +100,7 @@ PlayerSettings:
   useMacAppStoreValidation: 0
   macAppStoreCategory: public.app-category.games
   gpuSkinning: 0
+  meshDeformation: 0
   xboxPIXTextureCapture: 0
   xboxEnableAvatar: 0
   xboxEnableKinect: 0
@@ -127,10 +132,9 @@ PlayerSettings:
   switchAllowGpuScratchShrinking: 0
   switchNVNMaxPublicTextureIDCount: 0
   switchNVNMaxPublicSamplerIDCount: 0
-  switchNVNGraphicsFirmwareMemory: 32
   switchMaxWorkerMultiple: 8
-  stadiaPresentMode: 0
-  stadiaTargetFramerate: 0
+  switchNVNGraphicsFirmwareMemory: 32
+  switchGraphicsJobsSyncAfterKick: 1
   vulkanNumSwapchainBuffers: 3
   vulkanEnableSetSRGBWrite: 0
   vulkanEnablePreTransform: 0
@@ -160,6 +164,7 @@ PlayerSettings:
   resetResolutionOnWindowResize: 0
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
+  androidMinAspectRatio: 1
   applicationIdentifier:
     Android: com.DefaultCompany.JellyGarden
     Standalone: com.DefaultCompany.Jelly-Garden
@@ -173,7 +178,7 @@ PlayerSettings:
     tvOS: 0
   overrideDefaultApplicationIdentifier: 0
   AndroidBundleVersionCode: 1
-  AndroidMinSdkVersion: 22
+  AndroidMinSdkVersion: 23
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1
   aotOptions: 
@@ -183,14 +188,16 @@ PlayerSettings:
   ForceInternetPermission: 0
   ForceSDCardPermission: 0
   CreateWallpaper: 0
-  APKExpansionFiles: 0
+  androidSplitApplicationBinary: 0
   keepLoadedShadersAlive: 0
   StripUnusedMeshComponents: 0
   strictShaderVariantMatching: 0
   VertexChannelCompressionMask: 214
   iPhoneSdkVersion: 988
+  iOSSimulatorArchitecture: 0
   iOSTargetOSVersionString: 13.0
   tvOSSdkVersion: 0
+  tvOSSimulatorArchitecture: 0
   tvOSRequireExtendedGameController: 0
   tvOSTargetOSVersionString: 13.0
   VisionOSSdkVersion: 0
@@ -219,7 +226,6 @@ PlayerSettings:
     rgba: 0
   iOSLaunchScreenFillPct: 100
   iOSLaunchScreenSize: 100
-  iOSLaunchScreenCustomXibPath: 
   iOSLaunchScreeniPadType: 0
   iOSLaunchScreeniPadImage: {fileID: 0}
   iOSLaunchScreeniPadBackgroundColor:
@@ -227,7 +233,6 @@ PlayerSettings:
     rgba: 0
   iOSLaunchScreeniPadFillPct: 100
   iOSLaunchScreeniPadSize: 100
-  iOSLaunchScreeniPadCustomXibPath: 
   iOSLaunchScreenCustomStoryboardPath: 
   iOSLaunchScreeniPadCustomStoryboardPath: 
   iOSDeviceRequirements: []
@@ -264,15 +269,18 @@ PlayerSettings:
   useCustomGradleSettingsTemplate: 0
   useCustomProguardFile: 0
   AndroidTargetArchitectures: 3
-  AndroidTargetDevices: 0
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
   AndroidKeystoreName: /Users/sergeydroba/Dropbox/Asset Store Projects/keystore.keystore
   AndroidKeyaliasName: 
   AndroidEnableArmv9SecurityFeatures: 0
+  AndroidEnableArm64MTE: 0
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 1
   AndroidIsGame: 1
+  androidAppCategory: 3
+  useAndroidAppCategory: 1
+  androidAppCategoryOther: 
   AndroidEnableTango: 0
   androidEnableBanner: 1
   androidUseLowAccuracyLocation: 0
@@ -282,11 +290,12 @@ PlayerSettings:
     height: 180
     banner: {fileID: 0}
   androidGamepadSupportLevel: 0
-  chromeosInputEmulation: 1
   AndroidMinifyRelease: 0
   AndroidMinifyDebug: 0
   AndroidValidateAppBundleSize: 1
   AndroidAppBundleSizeToValidate: 150
+  AndroidReportGooglePlayAppDependencies: 1
+  androidSymbolsSizeThreshold: 800
   m_BuildTargetIcons:
   - m_BuildTarget: 
     m_Icons:
@@ -532,6 +541,9 @@ PlayerSettings:
   - m_BuildTarget: iOSSupport
     m_APIs: 10000000
     m_Automatic: 1
+  - m_BuildTarget: WindowsStandaloneSupport
+    m_APIs: 0200000012000000
+    m_Automatic: 0
   m_BuildTargetVRSettings: []
   m_DefaultShaderChunkSizeInMB: 16
   m_DefaultShaderChunkCount: 0
@@ -544,18 +556,24 @@ PlayerSettings:
     iPhone: 1
     tvOS: 1
   m_BuildTargetGroupLightmapEncodingQuality:
-  - m_BuildTarget: Standalone
+  - serializedVersion: 2
+    m_BuildTarget: Standalone
     m_EncodingQuality: 1
-  - m_BuildTarget: XboxOne
+  - serializedVersion: 2
+    m_BuildTarget: XboxOne
     m_EncodingQuality: 1
-  - m_BuildTarget: PS4
+  - serializedVersion: 2
+    m_BuildTarget: PS4
     m_EncodingQuality: 1
   m_BuildTargetGroupHDRCubemapEncodingQuality:
-  - m_BuildTarget: Standalone
+  - serializedVersion: 2
+    m_BuildTarget: Standalone
     m_EncodingQuality: 2
-  - m_BuildTarget: XboxOne
+  - serializedVersion: 2
+    m_BuildTarget: XboxOne
     m_EncodingQuality: 2
-  - m_BuildTarget: PS4
+  - serializedVersion: 2
+    m_BuildTarget: PS4
     m_EncodingQuality: 2
   m_BuildTargetGroupLightmapSettings: []
   m_BuildTargetGroupLoadStoreDebugModeSettings: []
@@ -564,6 +582,7 @@ PlayerSettings:
   playModeTestRunnerEnabled: 0
   runPlayModeTestAsEditModeTest: 0
   actionOnDotNetUnhandledException: 1
+  editorGfxJobOverride: 1
   enableInternalProfiler: 0
   logObjCUncaughtExceptions: 1
   enableCrashReportAPI: 0
@@ -571,7 +590,7 @@ PlayerSettings:
   locationUsageDescription: 
   microphoneUsageDescription: 
   bluetoothUsageDescription: 
-  macOSTargetOSVersion: 10.13.0
+  macOSTargetOSVersion: 11.0
   switchNMETAOverride: 
   switchNetLibKey: 
   switchSocketMemoryPoolSize: 6144
@@ -709,12 +728,14 @@ PlayerSettings:
   switchSocketBufferEfficiency: 4
   switchSocketInitializeEnabled: 1
   switchNetworkInterfaceManagerInitializeEnabled: 1
+  switchDisableHTCSPlayerConnection: 0
   switchUseNewStyleFilepaths: 0
   switchUseLegacyFmodPriorities: 0
   switchUseMicroSleepForYield: 1
   switchEnableRamDiskSupport: 0
   switchMicroSleepForYieldTime: 25
   switchRamDiskSpaceSize: 12
+  switchUpgradedPlayerSettingsToNMETA: 0
   ps4NPAgeRating: 12
   ps4NPTitleSecret: 
   ps4NPTrophyPackPath: 
@@ -818,6 +839,11 @@ PlayerSettings:
   webGLMemoryGeometricGrowthStep: 0.2
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
+  webGLWebAssemblyTable: 0
+  webGLWebAssemblyBigInt: 0
+  webGLCloseOnQuit: 0
+  webWasm2023: 0
+  webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
     Android: UNITY_ADS
     Windows Store Apps: UNITY_ADS
@@ -834,6 +860,7 @@ PlayerSettings:
     iPhone: 1
   il2cppCompilerConfiguration: {}
   il2cppCodeGeneration: {}
+  il2cppStacktraceInformation: {}
   managedStrippingLevel:
     Android: 1
     EmbeddedLinux: 1
@@ -861,6 +888,7 @@ PlayerSettings:
   gcWBarrierValidation: 0
   apiCompatibilityLevelPerPlatform:
     WebGL: 3
+  editorAssembliesCompatibilityLevel: 2
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: Pikachu
@@ -941,9 +969,11 @@ PlayerSettings:
   hmiPlayerDataPath: 
   hmiForceSRGBBlit: 1
   embeddedLinuxEnableGamepadInput: 1
-  hmiLogStartupTiming: 0
   hmiCpuConfiguration: 
+  hmiLogStartupTiming: 0
+  qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
+  captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: f3b27b8b-7e65-4efb-92d6-e4658e1b0205
@@ -957,3 +987,7 @@ PlayerSettings:
   platformRequiresReadableAssets: 0
   virtualTexturingSupportEnabled: 0
   insecureHttpOption: 0
+  androidVulkanDenyFilterList: []
+  androidVulkanAllowFilterList: []
+  androidVulkanDeviceFilterListAsset: {fileID: 0}
+  d3d12DeviceFilterListAsset: {fileID: 0}

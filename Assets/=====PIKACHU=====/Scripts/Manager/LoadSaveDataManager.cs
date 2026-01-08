@@ -1,73 +1,37 @@
-using System.Collections;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class LoadSaveDataManager : MonoBehaviour
+public class LoadSaveDataManager : Singleton<LoadSaveDataManager>
 {
-    [SerializeField] TextMeshProUGUI LevelText;
-    [SerializeField] private TextMeshProUGUI NumOfHint;
-    [SerializeField] private TextMeshProUGUI NumOfChanges;
-    void OnEnable()
+    public int GetSavedLevel()
     {
+        return PlayerPrefs.GetInt(GameConstants.KEY_LEVEL, 1);
+    }
 
-        if (!GameManager.Instance.isContinue)
-        {
-            PlayerPrefs.SetInt("Level", 0);
-            PlayerPrefs.SetInt("Hint", GameManager.Instance.levelDatas[0].Suggestions);
-            PlayerPrefs.SetInt("Changes", GameManager.Instance.levelDatas[0].Changes);
-        }
-        GetText();
-    }
-    public void LevelUp()
+    public void SaveLevel(int level)
     {
-        PlaySound.Instance.PlayClickSound();
-        PlayerPrefs.SetInt("Level", PlayerPrefs.GetInt("Level") + 1);
-        Restart();
+        PlayerPrefs.SetInt(GameConstants.KEY_LEVEL, level);
+        PlayerPrefs.Save();
     }
-    public void Hint()
+
+    public int GetSavedHint(int defaultVal = 3)
     {
-        //if (int.Parse(NumOfHint.text) == 0) return;
-        PlayerPrefs.SetInt("Hint", PlayerPrefs.GetInt("Hint") - 1);
-        NumOfHint.text = PlayerPrefs.GetInt("Hint").ToString();
+        return PlayerPrefs.GetInt(GameConstants.KEY_HINT, defaultVal);
     }
-    public void Restart()
+
+    public void SaveHint(int amount)
     {
-        int level = PlayerPrefs.GetInt("Level");
-        PlayerPrefs.SetInt("Hint", (GameManager.Instance.levelDatas[(level >= 8) ? 7 : (level - 1)].Suggestions));
-        PlayerPrefs.SetInt("Changes", (GameManager.Instance.levelDatas[(level >= 8) ? 7 : (level - 1)].Changes));
-        PlayerPrefs.SetInt("Time", (GameManager.Instance.levelDatas[(level >= 8) ? 7 : (level - 1)].timeLimit));
-        GetText();
+        PlayerPrefs.SetInt(GameConstants.KEY_HINT, amount);
+        PlayerPrefs.Save();
     }
-    public void Lose()
+
+    public int GetSavedShuffle(int defaultVal = 3)
     {
-        int level = PlayerPrefs.GetInt("Level");
-        PlayerPrefs.SetInt("Time", GameManager.Instance.levelDatas[(level <= 8 && level >= 1) ? level - 1 : 8].timeLimit);
-        PlayerPrefs.SetInt("Hint", (GameManager.Instance.levelDatas[(level >= 8) ? 7 : (level - 1)].Suggestions));
-        PlayerPrefs.SetInt("Changes", (GameManager.Instance.levelDatas[(level >= 8) ? 7 : (level - 1)].Changes));
+        return PlayerPrefs.GetInt(GameConstants.KEY_SHUFFLE, defaultVal);
     }
-    public void Changes()
+
+    public void SaveShuffle(int amount)
     {
-        //if (int.Parse(NumOfChanges.text) == 0) return;
-        PlayerPrefs.SetInt("Changes", PlayerPrefs.GetInt("Changes") - 1);
-        //Debug.LogError(PlayerPrefs.GetInt("Changes"));
-        NumOfChanges.text = PlayerPrefs.GetInt("Changes").ToString();
-    }
-    void GetText()
-    {
-        NumOfHint.text = PlayerPrefs.GetInt("Hint").ToString();
-        NumOfChanges.text = PlayerPrefs.GetInt("Changes").ToString();
-        LevelText.text = "LEVEL : " + PlayerPrefs.GetInt("Level").ToString();
-    }
-    public void GetIAP(bool isChange)
-    {
-        int current = (isChange) ? PlayerPrefs.GetInt("Changes") : PlayerPrefs.GetInt("Hint");
-        current += 1;
-        PlayerPrefs.SetInt((isChange) ? "Changes" : "Hint", current);
-        if (isChange) {
-            NumOfChanges.text = current.ToString(); 
-        } else {
-            NumOfHint.text = current.ToString(); 
-        }
+        PlayerPrefs.SetInt(GameConstants.KEY_SHUFFLE, amount);
+        PlayerPrefs.Save();
     }
 }

@@ -3,19 +3,35 @@ using UnityEngine.UI;
 
 public class CanvasDefeat : UICanvas
 {
+    [Header("Buttons")]
+    [SerializeField] private Button retryButton;
+    [SerializeField] private Button homeButton;
 
-    public void RetryButton()
+    public override void Setup()
     {
-        // Load lại màn chơi
-        UIManager.Instance.CloseAll();
-        GameManager.Instance.StartGame();
-        UIManager.Instance.OpenUI<CanvasGamePlay>();
+        base.Setup();
+        
+        // Gán sự kiện code-based để an toàn và dễ quản lý
+        if (retryButton != null)
+        {
+            retryButton.onClick.RemoveAllListeners();
+            retryButton.onClick.AddListener(OnRetryClicked);
+        }
+
+        if (homeButton != null)
+        {
+            homeButton.onClick.RemoveAllListeners();
+            homeButton.onClick.AddListener(OnHomeClicked);
+        }
     }
 
-    public void HomeButton()
+    private void OnRetryClicked()
     {
-        // Về menu chính
-        UIManager.Instance.CloseAll();
+        GameManager.Instance.RetryLevel();
+    }
+
+    private void OnHomeClicked()
+    {
         GameManager.Instance.LoadHome();
     }
 }
