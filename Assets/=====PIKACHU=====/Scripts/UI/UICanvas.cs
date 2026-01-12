@@ -1,10 +1,12 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class UICanvas : MonoBehaviour
 {
     [SerializeField] bool isDestroyOnClose = false;
-    private void Awake()
+    protected CanvasGroup MCanvasGroup;
+    protected virtual void Awake()
     {
         // xu ly tai tho
         RectTransform rect = GetComponent<RectTransform>();
@@ -20,6 +22,7 @@ public class UICanvas : MonoBehaviour
             rect.offsetMin = leftBottom;
             rect.offsetMax = rightTop;
         }
+        MCanvasGroup = GetComponent<CanvasGroup>();
     }
 
     // goi truoc khi canvas duoc active
@@ -31,6 +34,13 @@ public class UICanvas : MonoBehaviour
     public virtual void Open()
     {
         gameObject.SetActive(true);
+        MCanvasGroup.blocksRaycasts = false;
+
+        MCanvasGroup.alpha = 0;
+        MCanvasGroup.DOFade(1, 0.5f).OnComplete((() =>
+        {
+            MCanvasGroup.blocksRaycasts = true;
+        }));
     }
     // tat canvas sau t (s)
     public virtual void Close(float time)
@@ -43,7 +53,7 @@ public class UICanvas : MonoBehaviour
         DoClose();
     }
 
-    private void DoClose()
+    private void DoClose(float time = 0.5f)
     {
         if (isDestroyOnClose)
         {
@@ -51,7 +61,11 @@ public class UICanvas : MonoBehaviour
         }
         else
         {
-            gameObject.SetActive(false);
+            MCanvasGroup.blocksRaycasts = false;
+            MCanvasGroup.DOFade(0, time).OnComplete((() =>
+            {
+                gameObject.SetActive(false);
+            }));
         }
     }
 

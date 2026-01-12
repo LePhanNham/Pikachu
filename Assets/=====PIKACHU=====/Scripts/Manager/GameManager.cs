@@ -41,10 +41,8 @@ public class GameManager : Singleton<GameManager>
 
     public void StartGame()
     {
-        // Load level từ save, nếu không có thì bắt đầu level 1
         int savedLevel = LoadSaveDataManager.Instance.GetSavedLevel();
         StartLevel(savedLevel);
-        
         currentState = GameState.Playing;
         OnGameStateChanged?.Invoke(currentState);
         SoundManager.Instance?.PlayMusic(SoundManager.Instance.bgmGameplay);

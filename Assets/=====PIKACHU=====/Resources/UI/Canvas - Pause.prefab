@@ -210,6 +210,7 @@ GameObject:
   - component: {fileID: 1228506770275196256}
   - component: {fileID: 3815891161672654267}
   - component: {fileID: 6028294014709767723}
+  - component: {fileID: 1938361136679728940}
   m_Layer: 5
   m_Name: Canvas - Pause
   m_TagString: Untagged
@@ -314,8 +315,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isDestroyOnClose: 0
   continueButton: {fileID: 6952510962729978932}
-  settingsButton: {fileID: 0}
   mainMenuButton: {fileID: 4191838783338125816}
+--- !u!225 &1938361136679728940
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7585770448765400745}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8226522588561232270
 GameObject:
   m_ObjectHideFlags: 0

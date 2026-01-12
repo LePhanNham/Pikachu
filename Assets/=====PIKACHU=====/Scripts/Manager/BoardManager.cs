@@ -53,7 +53,6 @@ public class BoardManager : Singleton<BoardManager>
     {
         if (tiles == null || board == null) return;
         
-        // Kill toàn bộ tween đang chạy để tránh lỗi
         DOTween.KillAll();
 
         for (int r = 0; r < rows; r++)
@@ -61,7 +60,7 @@ public class BoardManager : Singleton<BoardManager>
             for (int c = 0; c < cols; c++)
             {
                 if (board[r, c] != null) board[r, c].state = NodeState.Empty;
-                if (tiles[r, c] != null) Destroy(tiles[r, c]); // Destroy thay vì SetActive để clean sạch scene cũ
+                if (tiles[r, c] != null) Destroy(tiles[r, c]); 
             }
         }
         firstSelect = null;
@@ -96,7 +95,6 @@ public class BoardManager : Singleton<BoardManager>
 
     private void CreateBoard()
     {
-        // Clear children cũ nếu có
         foreach (Transform child in transform) Destroy(child.gameObject);
 
         for (int r = 0; r < rows; r++)
@@ -145,7 +143,6 @@ public class BoardManager : Singleton<BoardManager>
 
     public void SelectTile(int row, int col)
     {
-        // Chặn input nếu đang xử lý match hoặc game over
         if (isProcessing || GameManager.Instance.currentState != GameState.Playing) return;
         
         if (row < 0 || row >= rows || col < 0 || col >= cols) return;
@@ -452,14 +449,30 @@ public class BoardManager : Singleton<BoardManager>
          }
          return false;
     }
-    
+
+
     private bool IsBoardCleared() {
         foreach (var node in board) if (node != null && node.state == NodeState.Normal) return false;
         return true;
     }
     
-    public Vector3 GetWorldPosition(int row, int col) {
-        return new Vector3(col * offsetX, -row * offsetY, 0);
+    // public Vector3 GetWorldPosition(int row, int col) {
+    //     return new Vector3(col * offsetX, -row * offsetY, 0);
+    // }
+    public Vector3 GetWorldPosition(int row, int col)
+    {
+        float boardWidth  = (cols - 1) * offsetX;
+        float boardHeight = (rows - 1) * offsetY;
+
+        float startX = -boardWidth / 2f;
+        float startY =  boardHeight / 2f;
+
+        return new Vector3(
+            startX + col * offsetX,
+            startY - row * offsetY,
+            0
+        );
     }
+
     #endregion
 }
