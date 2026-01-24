@@ -1,9 +1,9 @@
-# 🎮 PIKACHU MATCH-3 GAME FLOW DESIGN
+# 🎮 PIKACHU MATCH-2 GAME FLOW DESIGN
 
 ## 📋 TỔNG QUAN LUỒNG GAME
 
 ### 🎯 Mục tiêu
-- Tạo một game match-3 với cơ chế nối các ô giống nhau bằng đường đi có tối đa 2 lần rẽ
+- Tạo một game match-2 với cơ chế nối các ô giống nhau bằng đường đi có tối đa 2 lần rẽ
 - Hệ thống level progression với độ khó tăng dần
 - Scoring system thông minh với bonus cho combo và quick match
 - Hint system và auto-solve để hỗ trợ người chơi
